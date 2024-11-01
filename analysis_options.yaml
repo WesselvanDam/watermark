@@ -1,0 +1,19 @@
+include: package:lint/strict.yaml
+
+analyzer:
+  exclude:
+    - lib/generated/**
+    - lib/**.g.dart
+    - lib/**.freezed.dart
+  plugins:
+    - custom_lint
+
+linter:
+  rules:
+    file_names: false
+    prefer_relative_imports: true
+    always_use_package_imports: false
+    prefer_single_quotes: true
+    sort_constructors_first: true
+    always_put_control_body_on_new_line: true
+    always_put_required_named_parameters_first: true
