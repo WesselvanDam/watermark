@@ -1,3 +1,73 @@
 {
-  "hello": "Hello $name"
+  "config": {
+    "heading": "Configuration",
+    "input": {
+      "heading": "Input",
+      "source": {
+        "heading": "Images",
+        "placeholder": "Choose the source folder",
+        "info": "All images in this folder and its subfolders will be processed"
+      },
+      "watermark": {
+        "heading": "Watermark",
+        "placeholder": "Choose the watermark",
+        "info": "Choose the image file to use as watermark. By default, the watermark will be placed in the bottom right corner"
+      }
+    },
+    "output": {
+      "heading": "Output",
+      "destination": {
+        "heading": "Destination",
+        "placeholder": "Choose the destination folder",
+        "info": "The processed images will be saved in this folder. The exact location in this folder will be determined by the filename format and the parameters that you can set below."
+      },
+      "filenameFormat": {
+        "heading": "Filename format",
+        "placeholder": "Choose the filename format",
+        "info": "The processed images will be saved with filenames that follow this format. You can use the following placeholders: {{folder}}, {{file}}, {{number}} and {{status}}. The first three values can be set in the 'Select' tab. The last value will be 'marked' if the image is marked or 'keptUnmarked' if the image is kept unmarked. For example, if the filename format is '{{folder}}\\{{status}}\\{{file}}_{{number}}', the processed images will be saved in subfolders of the destination folder named 'marked' and 'keptUnmarked'. Use a single backslash to separate folders."
+      }
+    },
+    "placement": {
+      "heading": "Placement",
+      "leftFraction": {
+        "heading": "Left fraction",
+        "info": "The fraction of the image width that determines the distance from the left edge of the image to the right edge of the watermark. The value must be between 0 and 1. For example, 0.9 means that the right side of the watermark will be placed at 90% of the image width from the left edge."
+      },
+      "topFraction": {
+        "heading": "Top fraction",
+        "info": "The fraction of the image height that determines the distance from the top edge of the image to the bottom edge of the watermark. The value must be between 0 and 1. For example, 0.9 means that the bottom side of the watermark will be placed at 90% of the image height from the top edge."
+      },
+      "widthFraction": {
+        "heading": "Width fraction",
+        "info": "The fraction of the image width that determines the width of the watermark. The value must be between 0 and 1. For example, 0.1 means that the width of the watermark will be 10% of the image width."
+      }
+    }
+  },
+  "select": {
+    "heading": "Select",
+    "parameters": {
+      "folder": {
+        "key": "folder",
+        "initialValue": "MyFolder"
+      },
+      "file": {
+        "key": "file",
+        "initialValue": "MyFile"
+      },
+      "number": {
+        "key": "number",
+        "initialValue": "1"
+      }
+    },
+    "actions": {
+      "previous": "Previous",
+      "skip": "Skip",
+      "dontMark": "Keep, don't mark",
+      "mark": "Keep and mark"
+    }
+  },
+  "progress": "${current} of ${total}",
+  "shortcuts": "Activate shortcuts",
+  "shortcutsDescription": "Left arrow: Previous, Right arrow: Skip, Down arrow: Keep, Up arrow: Keep and mark",
+  "save": "Save configuration"
 }

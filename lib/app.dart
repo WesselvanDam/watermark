@@ -19,7 +19,7 @@ class App extends ConsumerWidget {
     return MaterialApp.router(
       title: 'App',
       debugShowCheckedModeBanner: false,
-      theme: theme.dark(),
+      theme: theme.theme(),
       routerConfig: router,
       locale: TranslationProvider.of(context).flutterLocale,
       supportedLocales: AppLocaleUtils.supportedLocales,

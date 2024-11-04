@@ -1,17 +1,20 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-// Note: when targeting other platforms, you may need to stub out the following import
-import 'package:flutter_web_plugins/flutter_web_plugins.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app.dart';
 import 'i18n/strings.g.dart';
+import 'providers/prefs.dart';
+import 'utils/providerObserver.dart';
 
-void main() {
+void main() async{
   WidgetsFlutterBinding.ensureInitialized();
-  if (kIsWeb) {
-    usePathUrlStrategy();
-  }
-  runApp(ProviderScope(child: TranslationProvider(child: const App())));
+  final prefs = await SharedPreferences.getInstance();
+  runApp(
+    ProviderScope(
+      observers: [RiverpodProviderObserver()],
+      overrides: [prefsProvider.overrideWithValue(prefs)],
+      child: TranslationProvider(child: const App()),
+    ),
+  );
 }
