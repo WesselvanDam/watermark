@@ -2,7 +2,7 @@ name: watermarker
 description: "A tool to watermark images"
 publish_to: 'none' 
 
-version: 0.0.2+2
+version: 0.0.3+3
 
 environment:
   sdk: '>=3.4.1 <4.0.0'

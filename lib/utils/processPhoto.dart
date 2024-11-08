@@ -1,10 +1,13 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image/image.dart' as img;
 
 import '../i18n/strings.g.dart';
+import '../models/config.dart';
 import '../models/photo.dart';
 import '../pages/home/photoIndex.dart';
 import '../providers/configuration.dart';
@@ -38,18 +41,39 @@ Future<Photo> _removeMarked(Photo photo) async {
 
 Future<Photo> _unmark(Photo photo, WidgetRef ref) async {
   final unmarkedPath = generateOutputPath(ref, status: Status.keptUnmarked);
-  return File(unmarkedPath).writeAsBytes(photo.original.readAsBytesSync()).then(
-        (value) => photo.copyWith(unmarkedPath: unmarkedPath),
-      );
+  return await compute(
+    _writeUnmarkedFile,
+    {'photo': photo, 'unmarkedPath': unmarkedPath},
+  );
 }
 
 Future<Photo> _mark(Photo photo, WidgetRef ref) async {
   final config = ref.read(configurationProvider);
-  final markedImage = await markImage(photo, config);
   final markedPath = generateOutputPath(ref);
-  return File(markedPath).writeAsBytes(img.encodeJpg(markedImage)).then(
-        (value) => photo.copyWith(markedPath: markedPath),
-      );
+  return await compute(
+    _writeMarkedFile,
+    {'photo': photo, 'markedPath': markedPath, 'config': config},
+  );
+}
+
+Future<Photo> _unmarkAndMark(Photo photo, WidgetRef ref) async {
+  return await _unmark(photo, ref).then((value) => _mark(value, ref));
+}
+
+Future<Photo> _writeUnmarkedFile(Map<String, dynamic> args) async {
+  final photo = args['photo'] as Photo;
+  final unmarkedPath = args['unmarkedPath'] as String;
+  await File(unmarkedPath).writeAsBytes(photo.original.readAsBytesSync());
+  return photo.copyWith(unmarkedPath: unmarkedPath);
+}
+
+Future<Photo> _writeMarkedFile(Map<String, dynamic> args) async {
+  final markedImage =
+      await markImage(args['photo'] as Photo, args['config'] as Config);
+  final markedPath = args['markedPath'] as String;
+  final photo = args['photo'] as Photo;
+  await File(markedPath).writeAsBytes(img.encodeJpg(markedImage, quality: 90));
+  return photo.copyWith(markedPath: markedPath);
 }
 
 Future<Photo> processPhoto(Photo photo, Status status, WidgetRef ref) async {
@@ -61,8 +85,7 @@ Future<Photo> processPhoto(Photo photo, Status status, WidgetRef ref) async {
   if (photo.status == Status.none) {
     // The photo has not been processed yet
     processedPhoto = switch (status) {
-      Status.marked =>
-        await _unmark(photo, ref).then((value) => _mark(value, ref)),
+      Status.marked => await _unmarkAndMark(photo, ref),
       Status.keptUnmarked => await _unmark(photo, ref),
       Status.skipped => await _skip(photo),
       Status.none => photo,

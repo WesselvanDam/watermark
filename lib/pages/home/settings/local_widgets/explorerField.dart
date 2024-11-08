@@ -28,7 +28,8 @@ class _ExplorerFieldState extends ConsumerState<ExplorerField> {
   void initState() {
     super.initState();
     _controller = TextEditingController(
-        text: widget.displayCallback(ref.read(configurationProvider)));
+      text: widget.displayCallback(ref.read(configurationProvider)),
+    );
   }
 
   @override
@@ -40,17 +41,18 @@ class _ExplorerFieldState extends ConsumerState<ExplorerField> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-        onTap: () async {
-          final path = await _selectPath(context, ref);
-          widget.onPathSelected(path);
-          _controller.text = path ?? '';
-        },
-        child: AbsorbPointer(
-          child: TextField(
-            readOnly: true,
-            controller: _controller,
-          ),
-        ));
+      onTap: () async {
+        final path = await _selectPath(context, ref);
+        widget.onPathSelected(path);
+        _controller.text = path ?? '';
+      },
+      child: AbsorbPointer(
+        child: TextField(
+          readOnly: true,
+          controller: _controller,
+        ),
+      ),
+    );
   }
 
   Future<String?> _selectPath(BuildContext context, WidgetRef ref) async {

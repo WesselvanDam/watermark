@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../i18n/strings.g.dart';
-import '../../../models/photo.dart';
 import '../../../providers/configuration.dart';
 import '../../../providers/parameters.dart';
 import '../../../providers/photos.dart';
@@ -20,10 +18,11 @@ class Select extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final index = ref.watch(photoIndexProvider);
+    final index = ref.watch(photoIndexProvider.select((value) => value));
     final photo = ref.watch(
       photosProvider.select((value) => value.isEmpty ? null : value[index]),
     );
+    debugPrint('Index: $index. Photo: $photo');
 
     if (photo == null) {
       return const SizedBox();
@@ -95,7 +94,11 @@ class Select extends ConsumerWidget {
             Center(
               child: SizedBox(
                 height: 480,
-                child: Center(child: ImagePreview(image: photo.original)),
+                child: Center(
+                  child: ImagePreview(
+                    image: photo.original,
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: 8.0),
@@ -103,9 +106,12 @@ class Select extends ConsumerWidget {
               child: Chip(
                 label: Text('Status: ${photo.status.name}'),
                 backgroundColor: {
-                  Status.none: Theme.of(context).colorScheme.surfaceContainerHigh,
-                  Status.skipped: Theme.of(context).colorScheme.tertiaryContainer,
-                  Status.keptUnmarked: Theme.of(context).colorScheme.secondaryContainer,
+                  Status.none:
+                      Theme.of(context).colorScheme.surfaceContainerHigh,
+                  Status.skipped:
+                      Theme.of(context).colorScheme.tertiaryContainer,
+                  Status.keptUnmarked:
+                      Theme.of(context).colorScheme.secondaryContainer,
                   Status.marked: Theme.of(context).colorScheme.primaryContainer,
                 }[photo.status],
               ),

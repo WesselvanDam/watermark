@@ -17,6 +17,9 @@ class Photos extends _$Photos {
     if (imageSourcepath == null) {
       return [];
     }
+    if (!Directory(imageSourcepath).existsSync()) {
+      return [];
+    }
     return Directory(imageSourcepath)
         .listSync(recursive: true)
         .where(
@@ -31,7 +34,11 @@ class Photos extends _$Photos {
   }
 
   void updateAtIndex(int index, Photo Function(Photo) cb) {
-    state[index] = cb(state[index]);
+    state = [
+      ...state.sublist(0, index),
+      cb(state[index]),
+      ...state.sublist(index + 1),
+    ];
   }
 
   void skip(int index) {
