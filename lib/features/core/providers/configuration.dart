@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'package:path/path.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../i18n/strings.g.dart';
-import '../models/config.dart';
-import '../utils/notifierUpdater.dart';
+import '../../../i18n/strings.g.dart';
+import '../../../models/config.dart';
+import '../../../utils/notifierUpdater.dart';
 import 'prefs.dart';
 
 part 'configuration.g.dart';

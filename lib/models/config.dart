@@ -4,7 +4,7 @@ part 'config.freezed.dart';
 part 'config.g.dart';
 
 @freezed
-class Config with _$Config {
+abstract class Config with _$Config {
   const factory Config({
     @Default(null) String? inputPath,
     @Default(null) String? watermarkPath,

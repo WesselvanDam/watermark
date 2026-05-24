@@ -1,9 +1,10 @@
 import 'dart:io';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../models/photo.dart';
-import '../utils/status.dart';
+import '../../../models/photo.dart';
+import '../../../utils/status.dart';
 import 'configuration.dart';
 
 part 'photos.g.dart';
@@ -12,8 +13,9 @@ part 'photos.g.dart';
 class Photos extends _$Photos {
   @override
   List<Photo> build() {
-    final imageSourcepath =
-        ref.watch(configurationProvider.select((value) => value.inputPath));
+    final imageSourcepath = ref.watch(
+      configurationProvider.select((value) => value.inputPath),
+    );
     if (imageSourcepath == null) {
       return [];
     }
@@ -22,23 +24,25 @@ class Photos extends _$Photos {
     }
     return Directory(imageSourcepath)
         .listSync(recursive: true)
-        .where(
-          (element) {
-            return element is File &&
-                ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp']
-                    .contains(element.path.toLowerCase().split('.').last);
-          },
-        )
+        .where((element) {
+          return element is File &&
+              [
+                'jpg',
+                'jpeg',
+                'png',
+                'gif',
+                'bmp',
+                'webp',
+              ].contains(element.path.toLowerCase().split('.').last);
+        })
         .map((e) => Photo(original: e as File))
         .toList();
   }
 
   void updateAtIndex(int index, Photo Function(Photo) cb) {
-    state = [
-      ...state.sublist(0, index),
-      cb(state[index]),
-      ...state.sublist(index + 1),
-    ];
+    final newState = List<Photo>.from(state);
+    newState[index] = cb(newState[index]);
+    state = newState;
   }
 
   void skip(int index) {

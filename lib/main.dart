@@ -4,10 +4,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app.dart';
 import 'i18n/strings.g.dart';
-import 'providers/prefs.dart';
+import 'features/core/providers/prefs.dart';
 import 'utils/providerObserver.dart';
 
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
   runApp(

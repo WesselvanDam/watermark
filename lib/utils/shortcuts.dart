@@ -4,9 +4,9 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/photo.dart';
-import '../pages/home/photoIndex.dart';
-import '../providers/photos.dart';
-import '../providers/shortcuts.dart';
+import '../features/photo/photoIndex.dart';
+import '../features/core/providers/photos.dart';
+import '../features/core/providers/shortcuts.dart';
 import 'processPhoto.dart';
 import 'status.dart';
 
@@ -33,8 +33,8 @@ abstract class BaseAction<T extends Intent> extends Action<T> {
 
   int get index => ref.read(photoIndexProvider);
   Photo? get photo => ref.read(
-        photosProvider.select((value) => value.isEmpty ? null : value[index]),
-      );
+    photosProvider.select((value) => value.isEmpty ? null : value[index]),
+  );
 }
 
 class PreviousAction extends BaseAction<PreviousIntent> {

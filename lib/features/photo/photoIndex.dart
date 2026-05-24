@@ -1,11 +1,12 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../providers/photos.dart';
+import '../core/providers/photos.dart';
 
 part 'photoIndex.g.dart';
 
 @Riverpod(keepAlive: true)
-class PhotoIndex extends _$PhotoIndex{
+class PhotoIndex extends _$PhotoIndex {
   int _maxLenght = 0;
 
   @override
@@ -17,5 +18,4 @@ class PhotoIndex extends _$PhotoIndex{
   void update(int Function(int state) update) {
     state = (update(state) + _maxLenght) % _maxLenght;
   }
-
 }

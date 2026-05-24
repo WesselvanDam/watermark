@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../models/config.dart';
-import '../../../../providers/configuration.dart';
+import '../../../models/config.dart';
+import '../../../features/core/providers/configuration.dart';
 
 class PlacementSlider extends ConsumerWidget {
   const PlacementSlider({
@@ -16,11 +16,7 @@ class PlacementSlider extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Slider(
-      value: displayCallback(ref.watch(configurationProvider)),
-      onChanged: onChanged,
-      divisions: 100,
-      label: '${displayCallback(ref.read(configurationProvider))}',
-    );
+    final value = displayCallback(ref.read(configurationProvider));
+    return Slider(value: value, onChanged: onChanged);
   }
 }

@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../i18n/strings.g.dart';
-import '../../../providers/configuration.dart';
-import '../../../providers/parameters.dart';
-import '../../../providers/photos.dart';
-import '../../../providers/shortcuts.dart';
-import '../../../utils/generateOutputPath.dart';
-import '../../../utils/processPhoto.dart';
-import '../../../utils/status.dart';
-import '../photoIndex.dart';
+import '../../i18n/strings.g.dart';
+import '../core/providers/configuration.dart';
+import '../core/providers/parameters.dart';
+import '../core/providers/photos.dart';
+import '../core/providers/shortcuts.dart';
+import '../../utils/generateOutputPath.dart';
+import '../../utils/processPhoto.dart';
+import '../../utils/status.dart';
+import '../photo/photoIndex.dart';
 import 'local_widgets/parameter.dart';
 import 'local_widgets/preview.dart';
 
@@ -53,9 +53,7 @@ class Select extends ConsumerWidget {
                 ),
                 const SizedBox(width: 8.0),
                 Flexible(
-                  child: ParameterTextField(
-                    name: t.select.parameters.file.key,
-                  ),
+                  child: ParameterTextField(name: t.select.parameters.file.key),
                 ),
                 const SizedBox(width: 8.0),
                 Flexible(
@@ -94,11 +92,7 @@ class Select extends ConsumerWidget {
             Center(
               child: SizedBox(
                 height: 480,
-                child: Center(
-                  child: ImagePreview(
-                    image: photo.original,
-                  ),
-                ),
+                child: Center(child: ImagePreview(image: photo.original)),
               ),
             ),
             const SizedBox(height: 8.0),
@@ -106,12 +100,15 @@ class Select extends ConsumerWidget {
               child: Chip(
                 label: Text('Status: ${photo.status.name}'),
                 backgroundColor: {
-                  Status.none:
-                      Theme.of(context).colorScheme.surfaceContainerHigh,
-                  Status.skipped:
-                      Theme.of(context).colorScheme.tertiaryContainer,
-                  Status.keptUnmarked:
-                      Theme.of(context).colorScheme.secondaryContainer,
+                  Status.none: Theme.of(
+                    context,
+                  ).colorScheme.surfaceContainerHigh,
+                  Status.skipped: Theme.of(
+                    context,
+                  ).colorScheme.tertiaryContainer,
+                  Status.keptUnmarked: Theme.of(
+                    context,
+                  ).colorScheme.secondaryContainer,
                   Status.marked: Theme.of(context).colorScheme.primaryContainer,
                 }[photo.status],
               ),
@@ -121,8 +118,9 @@ class Select extends ConsumerWidget {
               child: Consumer(
                 builder: (context, ref, child) {
                   ref.watch(
-                    configurationProvider
-                        .select((value) => value.outputFileNameFormat),
+                    configurationProvider.select(
+                      (value) => value.outputFileNameFormat,
+                    ),
                   );
                   // Also watch all the parameterProviders
                   ref.watch(parameterProvider(t.select.parameters.folder.key));
@@ -135,8 +133,9 @@ class Select extends ConsumerWidget {
                 },
               ),
             ),
-            ButtonBar(
-              overflowButtonSpacing: 8,
+            OverflowBar(
+              spacing: 8.0,
+              overflowSpacing: 8.0,
               children: [
                 TextButton.icon(
                   onPressed: () => handler(Status.none, -1),
@@ -154,11 +153,12 @@ class Select extends ConsumerWidget {
                   label: Text(t.select.actions.dontMark),
                 ),
                 FilledButton.icon(
-                  onPressed: ref.watch(
-                    configurationProvider.select(
-                      (value) => value.watermarkPath == null,
-                    ),
-                  )
+                  onPressed:
+                      ref.watch(
+                        configurationProvider.select(
+                          (value) => value.watermarkPath == null,
+                        ),
+                      )
                       ? null
                       : () => handler(Status.marked, 1),
                   icon: const Icon(Icons.arrow_upward),

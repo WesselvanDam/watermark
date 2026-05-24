@@ -7,7 +7,7 @@ import '../utils/status.dart';
 part 'photo.freezed.dart';
 
 @freezed
-class Photo with _$Photo {
+abstract class Photo with _$Photo {
   const factory Photo({
     required File original,
     @Default(Status.none) Status status,

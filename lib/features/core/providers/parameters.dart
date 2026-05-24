@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../i18n/strings.g.dart';
+import '../../../i18n/strings.g.dart';
 
 part 'parameters.g.dart';
 

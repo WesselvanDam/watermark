@@ -3,40 +3,37 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class RiverpodProviderObserver extends ProviderObserver {
+final class RiverpodProviderObserver extends ProviderObserver {
   @override
   void didAddProvider(
-    ProviderBase<Object?> provider,
+    ProviderObserverContext context,
     Object? value,
-    ProviderContainer container,
   ) =>
       debugPrint(
         '\x1B[34m'
-        '$provider Added'
+        '${context.provider} Added'
         '\x1B[0m',
       );
 
   @override
   void didDisposeProvider(
-    ProviderBase<Object?> provider,
-    ProviderContainer container,
+    ProviderObserverContext context,
   ) =>
       debugPrint(
         '\x1B[35m'
-        '$provider Disposed'
+        '${context.provider} Disposed'
         '\x1B[0m',
       );
 
   @override
   void didUpdateProvider(
-    ProviderBase<Object?> provider,
+    ProviderObserverContext context,
     Object? previousValue,
     Object? newValue,
-    ProviderContainer container,
   ) =>
       debugPrint(
         '\x1B[33m'
-        '$provider Updated:\n'
+        '${context.provider} Updated:\n'
         '\tPrevious Value: $previousValue\n'
         '\tNew Value: $newValue\n'
         '\x1B[0m',
@@ -44,15 +41,14 @@ class RiverpodProviderObserver extends ProviderObserver {
 
   @override
   void providerDidFail(
-    ProviderBase<Object?> provider,
+    ProviderObserverContext context,
     Object error,
     StackTrace stackTrace,
-    ProviderContainer container,
   ) =>
       debugPrint(
         '\x1B[31m'
         '$stackTrace\n'
-        '$provider Error: $error\n'
+        '${context.provider} Error: $error\n'
         '\x1B[0m',
       );
 }

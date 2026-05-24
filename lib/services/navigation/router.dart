@@ -7,7 +7,7 @@ import 'routes.dart';
 part 'router.g.dart';
 
 @riverpod
-GoRouter router(RouterRef ref) {
+GoRouter router(Ref ref) {
   final key = GlobalKey<NavigatorState>(debugLabel: 'routerKey');
 
   final initialLocation = ref.watch(initialLocationProvider);
@@ -25,7 +25,7 @@ GoRouter router(RouterRef ref) {
 }
 
 @riverpod
-String initialLocation(InitialLocationRef ref) => '/';
+String initialLocation(Ref ref) => '/';
 
 String? redirect(BuildContext context, GoRouterState state) {
   return null;

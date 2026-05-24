@@ -4,9 +4,9 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../models/config.dart';
-import '../../../../providers/configuration.dart';
-import '../../../../providers/watermark.dart';
+import '../../../models/config.dart';
+import '../../core/providers/configuration.dart';
+import '../../core/providers/watermark.dart';
 
 class ImagePreview extends ConsumerStatefulWidget {
   const ImagePreview({required this.image, super.key});
@@ -19,7 +19,8 @@ class ImagePreview extends ConsumerStatefulWidget {
 
 class _ImagePreviewState extends ConsumerState<ImagePreview> {
   Future<ui.Image> _getImage() async {
-    return decodeImageFromList(widget.image.readAsBytesSync());
+    final bytes = await widget.image.readAsBytes();
+    return await decodeImageFromList(bytes);
   }
 
   @override
@@ -44,9 +45,7 @@ class _ImagePreviewState extends ConsumerState<ImagePreview> {
                 children: [
                   CustomPaint(
                     size: Size(width, height),
-                    painter: ImagePainter(
-                      image: image,
-                    ),
+                    painter: ImagePainter(image: image),
                   ),
                   Consumer(
                     builder: (context, ref, child) {
@@ -79,9 +78,7 @@ class _ImagePreviewState extends ConsumerState<ImagePreview> {
 }
 
 class ImagePainter extends CustomPainter {
-  ImagePainter({
-    required this.image,
-  });
+  ImagePainter({required this.image});
 
   final ui.Image image;
 
@@ -118,8 +115,12 @@ class WatermarkPainter extends CustomPainter {
     final watermarkWidth = watermark.width.toDouble();
     final watermarkHeight = watermark.height.toDouble();
 
-    final watermarkSrcRect =
-        Rect.fromLTWH(0, 0, watermarkWidth, watermarkHeight);
+    final watermarkSrcRect = Rect.fromLTWH(
+      0,
+      0,
+      watermarkWidth,
+      watermarkHeight,
+    );
 
     final width =
         imageWidth * config.watermarkWidthFraction * size.width / imageWidth;

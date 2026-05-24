@@ -1,17 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../pages/home/homePage.dart';
+import '../../features/home/homePage.dart';
 
 part 'routes.g.dart';
 
-@TypedShellRoute<ShellRoute>(
-  routes: [
-    TypedGoRoute<HomeRoute>(
-      path: '/',
-    ),
-  ],
-)
+@TypedShellRoute<ShellRoute>(routes: [TypedGoRoute<HomeRoute>(path: '/')])
 class ShellRoute extends ShellRouteData {
   const ShellRoute();
 
@@ -21,7 +15,7 @@ class ShellRoute extends ShellRouteData {
   }
 }
 
-class HomeRoute extends GoRouteData {
+class HomeRoute extends GoRouteData with $HomeRoute {
   const HomeRoute();
 
   @override

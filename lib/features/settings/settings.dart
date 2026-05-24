@@ -4,9 +4,9 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../i18n/strings.g.dart';
-import '../../../providers/configuration.dart';
-import '../../../providers/prefs.dart';
+import '../../i18n/strings.g.dart';
+import '../core/providers/configuration.dart';
+import '../core/providers/prefs.dart';
 import 'local_widgets/explorerField.dart';
 import 'local_widgets/filenameFormat.dart';
 import 'local_widgets/placementSlider.dart';
@@ -27,9 +27,9 @@ class Settings extends ConsumerWidget {
     );
     if (result != null) {
       final path = result.files.single.path;
-      ref.read(configurationProvider.notifier).update(
-            (state) => state.copyWith(watermarkPath: path),
-          );
+      ref
+          .read(configurationProvider.notifier)
+          .update((state) => state.copyWith(watermarkPath: path));
     }
   }
 
@@ -56,10 +56,9 @@ class Settings extends ConsumerWidget {
           t.config.input.source.heading,
           ExplorerField(
             pickFolder: true,
-            onPathSelected: (value) =>
-                ref.read(configurationProvider.notifier).update(
-                      (state) => state.copyWith(inputPath: value),
-                    ),
+            onPathSelected: (value) => ref
+                .read(configurationProvider.notifier)
+                .update((state) => state.copyWith(inputPath: value)),
             displayCallback: (config) =>
                 config.inputPath ?? t.config.input.source.placeholder,
           ),
@@ -70,10 +69,9 @@ class Settings extends ConsumerWidget {
           t.config.input.watermark.heading,
           ExplorerField(
             pickFolder: false,
-            onPathSelected: (value) =>
-                ref.read(configurationProvider.notifier).update(
-                      (state) => state.copyWith(watermarkPath: value),
-                    ),
+            onPathSelected: (value) => ref
+                .read(configurationProvider.notifier)
+                .update((state) => state.copyWith(watermarkPath: value)),
             displayCallback: (config) =>
                 config.watermarkPath ?? t.config.input.watermark.placeholder,
           ),
@@ -87,10 +85,9 @@ class Settings extends ConsumerWidget {
           t.config.output.destination.heading,
           ExplorerField(
             pickFolder: true,
-            onPathSelected: (value) =>
-                ref.read(configurationProvider.notifier).update(
-                      (state) => state.copyWith(outputPath: value),
-                    ),
+            onPathSelected: (value) => ref
+                .read(configurationProvider.notifier)
+                .update((state) => state.copyWith(outputPath: value)),
             displayCallback: (config) =>
                 config.outputPath ?? t.config.output.destination.placeholder,
           ),
@@ -110,10 +107,11 @@ class Settings extends ConsumerWidget {
           t.config.placement.leftFraction.heading,
           PlacementSlider(
             displayCallback: (config) => config.watermarkLeftFraction,
-            onChanged: (value) =>
-                ref.read(configurationProvider.notifier).update(
-                      (state) => state.copyWith(watermarkLeftFraction: value),
-                    ),
+            onChanged: (value) => ref
+                .read(configurationProvider.notifier)
+                .update(
+                  (state) => state.copyWith(watermarkLeftFraction: value),
+                ),
           ),
           t.config.placement.leftFraction.info,
         ),
@@ -122,10 +120,9 @@ class Settings extends ConsumerWidget {
           t.config.placement.topFraction.heading,
           PlacementSlider(
             displayCallback: (config) => config.watermarkTopFraction,
-            onChanged: (value) =>
-                ref.read(configurationProvider.notifier).update(
-                      (state) => state.copyWith(watermarkTopFraction: value),
-                    ),
+            onChanged: (value) => ref
+                .read(configurationProvider.notifier)
+                .update((state) => state.copyWith(watermarkTopFraction: value)),
           ),
           t.config.placement.topFraction.info,
         ),
@@ -134,10 +131,11 @@ class Settings extends ConsumerWidget {
           t.config.placement.widthFraction.heading,
           PlacementSlider(
             displayCallback: (config) => config.watermarkWidthFraction,
-            onChanged: (value) =>
-                ref.read(configurationProvider.notifier).update(
-                      (state) => state.copyWith(watermarkWidthFraction: value),
-                    ),
+            onChanged: (value) => ref
+                .read(configurationProvider.notifier)
+                .update(
+                  (state) => state.copyWith(watermarkWidthFraction: value),
+                ),
           ),
           t.config.placement.widthFraction.info,
         ),
@@ -155,10 +153,7 @@ class Settings extends ConsumerWidget {
   }
 
   Widget heading(BuildContext context, String text) {
-    return Text(
-      text,
-      style: Theme.of(context).textTheme.titleLarge,
-    );
+    return Text(text, style: Theme.of(context).textTheme.titleLarge);
   }
 
   Widget row(BuildContext context, String label, Widget child, String info) {
@@ -167,16 +162,13 @@ class Settings extends ConsumerWidget {
         Tooltip(
           message: info,
           textStyle: Theme.of(context).tooltipTheme.textStyle?.copyWith(
-                fontSize: Theme.of(context).textTheme.labelLarge?.fontSize,
-              ),
+            fontSize: Theme.of(context).textTheme.labelLarge?.fontSize,
+          ),
           margin: const EdgeInsets.symmetric(horizontal: 48.0),
           padding: const EdgeInsets.all(16.0),
           child: SizedBox(
             width: 140,
-            child: Text(
-              label,
-              style: Theme.of(context).textTheme.labelLarge,
-            ),
+            child: Text(label, style: Theme.of(context).textTheme.labelLarge),
           ),
         ),
         Flexible(child: child),

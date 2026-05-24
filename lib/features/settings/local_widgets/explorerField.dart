@@ -2,8 +2,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../models/config.dart';
-import '../../../../providers/configuration.dart';
+import '../../../models/config.dart';
+import '../../../features/core/providers/configuration.dart';
 
 class ExplorerField extends ConsumerStatefulWidget {
   const ExplorerField({
@@ -47,10 +47,7 @@ class _ExplorerFieldState extends ConsumerState<ExplorerField> {
         _controller.text = path ?? '';
       },
       child: AbsorbPointer(
-        child: TextField(
-          readOnly: true,
-          controller: _controller,
-        ),
+        child: TextField(readOnly: true, controller: _controller),
       ),
     );
   }
@@ -59,8 +56,8 @@ class _ExplorerFieldState extends ConsumerState<ExplorerField> {
     // Show the file picker
     return widget.pickFolder
         ? await FilePicker.platform.getDirectoryPath()
-        : await FilePicker.platform
-            .pickFiles()
-            .then((value) => value?.files.single.path);
+        : await FilePicker.platform.pickFiles().then(
+            (value) => value?.files.single.path,
+          );
   }
 }

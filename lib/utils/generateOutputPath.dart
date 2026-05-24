@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart';
 
 import '../i18n/strings.g.dart';
-import '../providers/configuration.dart';
-import '../providers/parameters.dart';
+import '../features/core/providers/configuration.dart';
+import '../features/core/providers/parameters.dart';
 import 'status.dart';
 
 String generateOutputPath(WidgetRef ref, {Status status = Status.marked}) {

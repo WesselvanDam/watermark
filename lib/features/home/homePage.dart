@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../utils/shortcuts.dart';
-import 'select/select.dart';
-import 'settings/settings.dart';
+import '../select/select.dart';
+import '../settings/settings.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -37,10 +37,7 @@ class HomePage extends ConsumerWidget {
                     child: const SingleChildScrollView(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Settings(),
-                          Select(),
-                        ],
+                        children: [Settings(), Select()],
                       ),
                     ),
                   ),
