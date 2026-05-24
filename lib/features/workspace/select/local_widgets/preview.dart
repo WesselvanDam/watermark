@@ -4,9 +4,9 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../models/config.dart';
-import '../../core/providers/configuration.dart';
-import '../../core/providers/watermark.dart';
+import '../../../../models/config.dart';
+import '../../../core/providers/configuration.dart';
+import '../../../core/providers/watermark.dart';
 
 class ImagePreview extends ConsumerStatefulWidget {
   const ImagePreview({required this.image, super.key});

@@ -3,8 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../utils/shortcuts.dart';
-import '../select/select.dart';
-import '../settings/settings.dart';
+import 'workspace_shell.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -27,23 +26,7 @@ class HomePage extends ConsumerWidget {
         },
         child: Builder(
           builder: (context) {
-            return Focus(
-              autofocus: true,
-              child: Scaffold(
-                body: Center(
-                  heightFactor: 1,
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 800),
-                    child: const SingleChildScrollView(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [Settings(), Select()],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            );
+            return const Focus(autofocus: true, child: WorkspaceShell());
           },
         ),
       ),
