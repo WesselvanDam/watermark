@@ -8,7 +8,7 @@ part 'parameters.g.dart';
 class Parameter extends _$Parameter {
   @override
   String build(String key) {
-    return t['select.parameters.$key.initialValue'].toString();
+    return t['workspace.parameters.$key.initialValue'].toString();
   }
 
   void update(String Function(String) cb) {
