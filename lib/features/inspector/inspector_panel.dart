@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -103,6 +102,8 @@ class InspectorPanel extends ConsumerWidget {
       photosProvider.select((photos) => allPhotosProcessed(photos)),
     );
 
+    final textStyle = Theme.of(context).textTheme.labelLarge;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -111,60 +112,49 @@ class InspectorPanel extends ConsumerWidget {
           child: ListView(
             padding: const EdgeInsets.symmetric(vertical: 16.0),
             children: [
-              _Section(
-                title: 'Metadata',
-                child: photo == null
-                    ? const _EmptyState(message: 'No photo selected.')
-                    : _MetadataRows(photo: photo),
+              Text('Metadata'.toUpperCase(), style: textStyle),
+              const Divider(),
+              if (photo == null)
+                const _EmptyState(message: 'No photo selected.')
+              else
+                _MetadataRows(photo: photo),
+              const SizedBox(height: 32.0),
+
+              Text('Parameters'.toUpperCase(), style: textStyle),
+              const Divider(),
+              const SizedBox(height: 8.0),
+              const ParameterTextField(name: 'folder', label: 'Folder'),
+              const SizedBox(height: 12.0),
+              const ParameterTextField(name: 'file', label: 'Filename'),
+              const SizedBox(height: 12.0),
+              const ParameterTextField(name: 'number', label: 'Number'),
+              const SizedBox(height: 8.0),
+
+              Text(
+                'Output Preview'.toUpperCase(),
+                style: Theme.of(context).textTheme.labelSmall,
               ),
-              const SizedBox(height: 16.0),
-              const _Section(
-                title: 'Output Parameters',
-                child: _ParameterEditors(),
-              ),
-              const SizedBox(height: 16.0),
-              const _Section(
-                title: 'Output Preview',
-                child: _OutputDestinationPreview(),
-              ),
-              const SizedBox(height: 16.0),
-              _Section(
-                title: 'Recent Queue',
-                child: recentItems.isEmpty
-                    ? const _EmptyState(message: 'No processed items yet.')
-                    : Column(
-                        children: [
-                          for (final entry in recentItems)
-                            _RecentQueueItem(entry: entry),
-                        ],
-                      ),
-              ),
+              const SizedBox(height: 12.0),
+              const _OutputDestinationPreview(),
+              const SizedBox(height: 32.0),
+
+              Text('Recent Queue'.toUpperCase(), style: textStyle),
+              const Divider(),
+              if (recentItems.isEmpty)
+                const _EmptyState(message: 'No processed items yet.')
+              else
+                Column(
+                  children: [
+                    for (final entry in recentItems)
+                      _RecentQueueItem(entry: entry),
+                  ],
+                ),
             ],
           ),
         ),
         if (isAllProcessed)
-           AllProcessedMessage(completionMessage: t.workspace.allProcessed),
+          AllProcessedMessage(completionMessage: t.workspace.allProcessed),
         _ProgressSection(current: current, total: total, progress: progress),
-      ],
-    );
-  }
-}
-
-class _Section extends StatelessWidget {
-  const _Section({required this.title, required this.child});
-
-  final String title;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(title, style: textTheme.labelLarge),
-        const SizedBox(height: 8.0),
-        child,
       ],
     );
   }
@@ -200,23 +190,6 @@ class _MetadataRows extends StatelessWidget {
             ],
           ),
         ),
-      ],
-    );
-  }
-}
-
-class _ParameterEditors extends StatelessWidget {
-  const _ParameterEditors();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        ParameterTextField(name: 'folder', label: 'Folder'),
-        SizedBox(height: 12.0),
-        ParameterTextField(name: 'file', label: 'Filename'),
-        SizedBox(height: 12.0),
-        ParameterTextField(name: 'number', label: 'Number'),
       ],
     );
   }
@@ -398,25 +371,22 @@ class _ProgressSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('Progress', style: textTheme.labelMedium),
-              Text('$current / $total', style: textTheme.labelMedium),
-            ],
-          ),
-          const SizedBox(height: 8.0),
-          LinearProgressIndicator(
-            value: progress,
-            backgroundColor: Theme.of(context).colorScheme.outlineVariant,
-          ),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('Progress', style: textTheme.labelMedium),
+            Text('$current / $total', style: textTheme.labelMedium),
+          ],
+        ),
+        const SizedBox(height: 8.0),
+        LinearProgressIndicator(
+          value: progress,
+          backgroundColor: Theme.of(context).colorScheme.outlineVariant,
+        ),
+      ],
     );
   }
 }

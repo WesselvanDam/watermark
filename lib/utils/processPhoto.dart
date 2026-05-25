@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -14,9 +15,56 @@ import '../i18n/strings.g.dart';
 import '../models/config.dart';
 import '../models/photo.dart';
 import 'generateOutputPath.dart';
-import 'markImage.dart';
 import 'photo_queue_state.dart';
+import 'placement.dart';
 import 'status.dart';
+
+img.Image _resize(img.Image image, int? maxDim) {
+  if (maxDim == null || maxDim <= 0) {
+    return image;
+  }
+
+  final width = image.width;
+  final height = image.height;
+  return img.copyResize(
+    image,
+    width: width > height ? min(width, maxDim) : null,
+    height: width > height ? null : min(height, maxDim),
+    maintainAspect: true,
+  );
+}
+
+Future<img.Image> _placeWatermark(Photo photo, Config config) async {
+  final original = img.decodeImage(photo.original.readAsBytesSync())!;
+  final watermark = img.decodeImage(
+    File(config.watermarkPath!).readAsBytesSync(),
+  )!;
+
+  final resizedOriginal = _resize(original, config.watermarkedMaxSize);
+
+  final placement = validatePlacement(
+    imageWidth: resizedOriginal.width.toDouble(),
+    imageHeight: resizedOriginal.height.toDouble(),
+    watermarkSourceWidth: watermark.width.toDouble(),
+    watermarkSourceHeight: watermark.height.toDouble(),
+    config: config,
+  );
+  if (!placement.isValid || placement.rect == null) {
+    throw StateError(placement.message ?? 'Invalid watermark placement.');
+  }
+
+  final rect = placement.rect!;
+  img.compositeImage(
+    resizedOriginal,
+    watermark,
+    dstX: rect.left.toInt(),
+    dstY: rect.top.toInt(),
+    dstW: rect.width.toInt(),
+    dstH: rect.height.toInt(),
+  );
+
+  return resizedOriginal;
+}
 
 Future<Photo> _skip(Photo photo) async {
   return photo.copyWith(status: Status.skipped);
@@ -41,10 +89,12 @@ Future<Photo> _removeMarked(Photo photo) async {
 }
 
 Future<Photo> _unmark(Photo photo, WidgetRef ref) async {
+  final config = ref.read(configurationProvider);
   final unmarkedPath = generateOutputPath(ref, status: Status.keptUnmarked);
   return await compute(_writeUnmarkedFile, {
     'photo': photo,
     'unmarkedPath': unmarkedPath,
+    'config': config,
   });
 }
 
@@ -63,14 +113,22 @@ Future<Photo> _unmarkAndMark(Photo photo, WidgetRef ref) async {
 }
 
 Future<Photo> _writeUnmarkedFile(Map<String, dynamic> args) async {
+  final config = args['config'] as Config;
   final photo = args['photo'] as Photo;
   final unmarkedPath = args['unmarkedPath'] as String;
-  await File(unmarkedPath).writeAsBytes(photo.original.readAsBytesSync());
+
+  if (config.originalMaxSize != null && config.originalMaxSize! > 0) {
+    final original = img.decodeImage(photo.original.readAsBytesSync())!;
+    final resizedOriginal = _resize(original, config.originalMaxSize);
+    await File(unmarkedPath).writeAsBytes(img.encodeJpg(resizedOriginal));
+  } else {
+    await File(unmarkedPath).writeAsBytes(photo.original.readAsBytesSync());
+  }
   return photo.copyWith(unmarkedPath: unmarkedPath);
 }
 
 Future<Photo> _writeMarkedFile(Map<String, dynamic> args) async {
-  final markedImage = await markImage(
+  final markedImage = await _placeWatermark(
     args['photo'] as Photo,
     args['config'] as Config,
   );

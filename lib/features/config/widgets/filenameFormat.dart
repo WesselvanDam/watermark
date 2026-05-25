@@ -21,7 +21,8 @@ class _FilenameFormatState extends ConsumerState<FilenameFormat> {
     super.initState();
     _controller = _TemplateTextEditingController();
     _controller.text =
-        ref.read(configurationProvider).outputFileNameFormat ?? '';
+        ref.read(configurationProvider).outputFileNameFormat ??
+        '{folder}\\{status}\\{filename}_{number}';
   }
 
   @override

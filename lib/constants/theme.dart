@@ -28,7 +28,7 @@ TextTheme createTextTheme(BuildContext context) {
         ),
         labelLarge: base.labelLarge?.copyWith(
           fontSize: 14,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
           letterSpacing: 0.02,
         ),
         labelSmall: base.labelSmall?.copyWith(
@@ -47,10 +47,10 @@ class MaterialTheme {
   ThemeData theme() {
     const colorScheme = ColorScheme(
       brightness: Brightness.dark,
-      primary: Color(0xFFC0C1FF),
-      onPrimary: Color(0xFF1000A9),
-      primaryContainer: Color(0xFF8083FF),
-      onPrimaryContainer: Color(0xFF0D0096),
+      primary: Color(0xFFBFC2FF),
+      onPrimary: Color(0xFF1B1B70),
+      primaryContainer: Color(0xFF3F4190),
+      onPrimaryContainer: Color(0xFFE0E0FF),
       secondary: Color(0xFF4CD7F6),
       onSecondary: Color(0xFF003640),
       secondaryContainer: Color(0xFF03B5D3),
@@ -72,8 +72,8 @@ class MaterialTheme {
       scrim: Color(0xFF000000),
       inverseSurface: Color(0xFFE5E2E1),
       onInverseSurface: Color(0xFF313030),
-      inversePrimary: Color(0xFF494BD6),
-      surfaceTint: Color(0xFFC0C1FF),
+      inversePrimary: Color(0xFF3F4190),
+      surfaceTint: Color(0xFFBFC2FF),
       surfaceContainerLowest: Color(0xFF0E0E0E),
       surfaceContainerLow: Color(0xFF1C1B1B),
       surfaceContainer: Color(0xFF201F1F),

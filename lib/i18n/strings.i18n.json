@@ -25,6 +25,16 @@
         "heading": "Filename format",
         "placeholder": "Choose the filename format",
         "info": "The processed images will be saved with filenames that follow this format. You can use the following placeholders: {folder}, {filename}, {number}, {status} and {original}. The first three values can be set in the Inspector panel; {original} is the original input filename and cannot be edited. The {status} value will be 'watermarked' if the image is marked or 'original' if the image is kept unmarked. For example, if the filename format is '{folder}\\\\{status}\\\\{filename}_{number}', the processed images will be saved in subfolders of the destination folder named 'watermarked' and 'original'. Use a single backslash to separate folders."
+      },
+      "originalMaxSize": {
+        "heading": "Original: max size",
+        "placeholder": "Leave empty to skip resizing",
+        "info": "The maximum dimension in pixels for the original image that is not watermarked. Leave this empty or set it to 0 to keep the original image unchanged."
+      },
+      "watermarkedMaxSize": {
+        "heading": "Watermarked: max size",
+        "placeholder": "Leave empty to skip resizing",
+        "info": "The maximum dimension in pixels for the watermarked image. Leave this empty or set it to 0 to keep the watermarked image the same size as the original."
       }
     },
     "placement": {
@@ -56,7 +66,7 @@
       },
       "file": {
         "key": "file",
-        "initialValue": "Image"
+        "initialValue": "image"
       },
       "number": {
         "key": "number",

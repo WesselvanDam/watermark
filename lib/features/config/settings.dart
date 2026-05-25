@@ -5,14 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../i18n/strings.g.dart';
-import '../../utils/placement.dart';
+import '../../widgets/input_row.dart';
 import '../../widgets/panel_header.dart';
 import '../core/providers/configuration.dart';
-import '../core/providers/filename_format_validation.dart';
-import '../core/providers/placement_validation.dart';
 import '../core/providers/prefs.dart';
 import 'widgets/explorerField.dart';
 import 'widgets/filenameFormat.dart';
+import 'widgets/maxSizeField.dart';
 import 'widgets/placementSlider.dart';
 
 class Settings extends ConsumerWidget {
@@ -71,13 +70,15 @@ class Settings extends ConsumerWidget {
   }
 
   List<Widget> _buildContent(BuildContext context, WidgetRef ref) {
+    final textStyle = Theme.of(context).textTheme.labelLarge;
+
     return [
-      heading(context, t.config.input.heading),
+      Text(t.config.input.heading.toUpperCase(), style: textStyle),
       const Divider(),
-      row(
-        context,
-        t.config.input.source.heading,
-        ExplorerField(
+      InputRow(
+        label: t.config.input.source.heading,
+        info: t.config.input.source.info,
+        child: ExplorerField(
           pickFolder: true,
           onPathSelected: (value) => ref
               .read(configurationProvider.notifier)
@@ -85,12 +86,11 @@ class Settings extends ConsumerWidget {
           displayCallback: (config) =>
               config.inputPath ?? t.config.input.source.placeholder,
         ),
-        t.config.input.source.info,
       ),
-      row(
-        context,
-        t.config.input.watermark.heading,
-        ExplorerField(
+      InputRow(
+        label: t.config.input.watermark.heading,
+        info: t.config.input.watermark.info,
+        child: ExplorerField(
           pickFolder: false,
           onPathSelected: (value) => ref
               .read(configurationProvider.notifier)
@@ -98,15 +98,14 @@ class Settings extends ConsumerWidget {
           displayCallback: (config) =>
               config.watermarkPath ?? t.config.input.watermark.placeholder,
         ),
-        t.config.input.watermark.info,
       ),
       const SizedBox(height: 32.0),
-      heading(context, t.config.output.heading),
+      Text(t.config.output.heading.toUpperCase(), style: textStyle),
       const Divider(),
-      row(
-        context,
-        t.config.output.destination.heading,
-        ExplorerField(
+      InputRow(
+        label: t.config.output.destination.heading,
+        info: t.config.output.destination.info,
+        child: ExplorerField(
           pickFolder: true,
           onPathSelected: (value) => ref
               .read(configurationProvider.notifier)
@@ -114,21 +113,41 @@ class Settings extends ConsumerWidget {
           displayCallback: (config) =>
               config.outputPath ?? t.config.output.destination.placeholder,
         ),
-        t.config.output.destination.info,
       ),
-      row(
-        context,
-        t.config.output.filenameFormat.heading,
-        const FilenameFormat(),
-        t.config.output.filenameFormat.info,
+      InputRow(
+        label: t.config.output.filenameFormat.heading,
+        info: t.config.output.filenameFormat.info,
+        child: const FilenameFormat(),
+      ),
+      InputRow(
+        label: t.config.output.originalMaxSize.heading,
+        info: t.config.output.originalMaxSize.info,
+        child: MaxSizeField(
+          configValue: (config) => config.originalMaxSize,
+          onChanged: (ref, value) => ref
+              .read(configurationProvider.notifier)
+              .update((state) => state.copyWith(originalMaxSize: value)),
+          placeholder: t.config.output.originalMaxSize.placeholder,
+        ),
+      ),
+      InputRow(
+        label: t.config.output.watermarkedMaxSize.heading,
+        info: t.config.output.watermarkedMaxSize.info,
+        child: MaxSizeField(
+          configValue: (config) => config.watermarkedMaxSize,
+          onChanged: (ref, value) => ref
+              .read(configurationProvider.notifier)
+              .update((state) => state.copyWith(watermarkedMaxSize: value)),
+          placeholder: t.config.output.watermarkedMaxSize.placeholder,
+        ),
       ),
       const SizedBox(height: 32.0),
-      heading(context, t.config.placement.heading),
+      Text(t.config.placement.heading.toUpperCase(), style: textStyle),
       const Divider(),
-      row(
-        context,
-        t.config.placement.anchorPoint.heading,
-        Builder(
+      InputRow(
+        label: t.config.placement.anchorPoint.heading,
+        info: t.config.placement.anchorPoint.info,
+        child: Builder(
           builder: (context) {
             final cfg = ref.watch(configurationProvider);
             final anchorX = cfg.watermarkAnchorX;
@@ -177,60 +196,47 @@ class Settings extends ConsumerWidget {
             );
           },
         ),
-        t.config.placement.anchorPoint.info,
       ),
-      row(
-        context,
-        t.config.placement.leftFraction.heading,
-        PlacementSlider(
+      InputRow(
+        label: t.config.placement.leftFraction.heading,
+        info: t.config.placement.leftFraction.info,
+        child: PlacementSlider(
           displayCallback: (config) => config.watermarkLeftFraction,
           onChanged: (value) => ref
               .read(configurationProvider.notifier)
               .update((state) => state.copyWith(watermarkLeftFraction: value)),
         ),
-        t.config.placement.leftFraction.info,
       ),
-      row(
-        context,
-        t.config.placement.topFraction.heading,
-        PlacementSlider(
+      InputRow(
+        label: t.config.placement.topFraction.heading,
+        info: t.config.placement.topFraction.info,
+        child: PlacementSlider(
           displayCallback: (config) => config.watermarkTopFraction,
           onChanged: (value) => ref
               .read(configurationProvider.notifier)
               .update((state) => state.copyWith(watermarkTopFraction: value)),
         ),
-        t.config.placement.topFraction.info,
       ),
-      row(
-        context,
-        t.config.placement.widthFraction.heading,
-        PlacementSlider(
+      InputRow(
+        label: t.config.placement.widthFraction.heading,
+        info: t.config.placement.widthFraction.info,
+        child: PlacementSlider(
           displayCallback: (config) => config.watermarkWidthFraction,
           onChanged: (value) => ref
               .read(configurationProvider.notifier)
               .update((state) => state.copyWith(watermarkWidthFraction: value)),
         ),
-        t.config.placement.widthFraction.info,
       ),
       const SizedBox(height: 16.0),
       Consumer(
         builder: (context, ref, child) {
-          final validation = ref.watch(placementValidationProvider);
-          final filenameValidation = ref.watch(
-            filenameFormatValidationProvider,
-          );
-          final isValid =
-              validation.isValid ||
-              validation.status == PlacementValidationStatus.unavailable;
-          final canSave = isValid && filenameValidation.isValid;
-
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Align(
                 alignment: Alignment.centerRight,
                 child: OutlinedButton.icon(
-                  onPressed: canSave ? () => storeConfig(ref) : null,
+                  onPressed: () => storeConfig(ref),
                   icon: const Icon(Icons.save),
                   label: Text(t.save),
                 ),
@@ -241,51 +247,5 @@ class Settings extends ConsumerWidget {
       ),
       const SizedBox(height: 16.0),
     ];
-  }
-
-  Widget heading(BuildContext context, String text) {
-    final textTheme = Theme.of(context).textTheme;
-    return Text(
-      text.toUpperCase(),
-      style: textTheme.labelLarge?.copyWith(
-        color: Theme.of(context).colorScheme.onSurface,
-        fontWeight: FontWeight.bold,
-      ),
-    );
-  }
-
-  Widget row(BuildContext context, String label, Widget child, String info) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final labelStyle = Theme.of(context).textTheme.labelSmall;
-        final labelWidget = Row(
-          children: [
-            Text(label.toUpperCase(), style: labelStyle),
-            IconButton(
-              icon: const Icon(Icons.info_outline, size: 16),
-              onPressed: null,
-              padding: EdgeInsets.zero,
-              visualDensity: VisualDensity.compact,
-              tooltip: info,
-            ),
-          ],
-        );
-
-        if (constraints.maxWidth < 360) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [labelWidget, child],
-          );
-        }
-
-        return Row(
-          children: [
-            SizedBox(width: 140, child: labelWidget),
-            const SizedBox(width: 8.0),
-            Flexible(child: child),
-          ],
-        );
-      },
-    );
   }
 }

@@ -19,7 +19,7 @@ class PlacementSlider extends ConsumerWidget {
     final value = displayCallback(ref.read(configurationProvider));
     final percentageValue = value * 100;
     return Slider(
-      padding: const EdgeInsets.only(right: 16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
       max: 100,
       divisions: 100,
       value: percentageValue,
