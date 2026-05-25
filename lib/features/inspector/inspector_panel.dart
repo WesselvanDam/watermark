@@ -8,10 +8,14 @@ import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
 
 import '../../models/photo.dart';
+import '../../utils/output_template.dart';
 import '../../utils/status.dart';
 import '../../widgets/panel_header.dart';
+import '../core/providers/configuration.dart';
 import '../core/providers/photos.dart';
+import '../core/providers/parameters.dart';
 import '../photo/photoIndex.dart';
+import '../workspace/select/local_widgets/parameter.dart';
 
 const int _recentQueueLimit = 5;
 
@@ -30,7 +34,7 @@ _StatusPresentation _statusPresentation(Status status, ColorScheme scheme) {
       color: scheme.primary,
     ),
     Status.keptUnmarked => _StatusPresentation(
-      label: 'Kept',
+      label: 'Original',
       icon: Icons.check_circle,
       color: scheme.secondary,
     ),
@@ -102,13 +106,23 @@ class InspectorPanel extends ConsumerWidget {
         const PanelHeader(title: 'Details', icon: Icons.data_object),
         Expanded(
           child: ListView(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
             children: [
               _Section(
                 title: 'Metadata',
                 child: photo == null
                     ? const _EmptyState(message: 'No photo selected.')
                     : _MetadataRows(photo: photo),
+              ),
+              const SizedBox(height: 16.0),
+              const _Section(
+                title: 'Output Parameters',
+                child: _ParameterEditors(),
+              ),
+              const SizedBox(height: 16.0),
+              const _Section(
+                title: 'Output Preview',
+                child: _OutputDestinationPreview(),
               ),
               const SizedBox(height: 16.0),
               _Section(
@@ -165,7 +179,7 @@ class _MetadataRows extends StatelessWidget {
 
     return Column(
       children: [
-        _MetaRow(label: 'Filename', value: path.basename(photo.original.path)),
+        _MetaRow(label: 'File', value: path.basename(photo.original.path)),
         _MetaRow(label: 'Last Modified', value: lastModified),
         _MetaRow(
           label: 'Status',
@@ -182,6 +196,75 @@ class _MetadataRows extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _ParameterEditors extends StatelessWidget {
+  const _ParameterEditors();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      children: [
+        ParameterTextField(name: 'folder', label: 'Folder'),
+        SizedBox(height: 12.0),
+        ParameterTextField(name: 'file', label: 'Filename'),
+        SizedBox(height: 12.0),
+        ParameterTextField(name: 'number', label: 'Number'),
+      ],
+    );
+  }
+}
+
+class _OutputDestinationPreview extends ConsumerWidget {
+  const _OutputDestinationPreview();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final baseStyle = Theme.of(context).textTheme.bodySmall;
+    final config = ref.watch(configurationProvider);
+    final template = config.outputFileNameFormat ?? '';
+    final photos = ref.watch(photosProvider);
+    final index = ref.watch(photoIndexProvider);
+    final hasPhoto = index >= 0 && index < photos.length;
+    final photo = hasPhoto ? photos[index] : null;
+    final preview = buildOutputTemplateTextSpan(
+      template,
+      baseStyle: baseStyle,
+      placeholderStyles: {
+        'folder': (baseStyle ?? const TextStyle()).copyWith(
+          color: colorScheme.primary,
+        ),
+        'filename': (baseStyle ?? const TextStyle()).copyWith(
+          color: colorScheme.secondary,
+        ),
+        'number': (baseStyle ?? const TextStyle()).copyWith(
+          color: colorScheme.tertiary,
+        ),
+        'status': (baseStyle ?? const TextStyle()).copyWith(
+          color: colorScheme.error,
+        ),
+        'original': (baseStyle ?? const TextStyle()).copyWith(
+          color: Colors.teal,
+        ),
+      },
+      values: {
+        'folder': ref.watch(parameterProvider('folder')),
+        'filename': ref.watch(parameterProvider('file')),
+        'number': ref.watch(parameterProvider('number')),
+        'status': '{status}',
+        'original': photo == null ? '' : path.basename(photo.original.path),
+      },
+      invalidPlaceholderStyle: (baseStyle ?? const TextStyle()).copyWith(
+        color: colorScheme.error,
+      ),
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [SelectableText.rich(preview, style: baseStyle)],
     );
   }
 }

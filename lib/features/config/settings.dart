@@ -8,6 +8,7 @@ import '../../i18n/strings.g.dart';
 import '../../utils/placement.dart';
 import '../../widgets/panel_header.dart';
 import '../core/providers/configuration.dart';
+import '../core/providers/filename_format_validation.dart';
 import '../core/providers/placement_validation.dart';
 import '../core/providers/prefs.dart';
 import 'local_widgets/explorerField.dart';
@@ -52,10 +53,7 @@ class Settings extends ConsumerWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          PanelHeader(
-            title: t.config.heading,
-            icon: Icons.settings,
-          ),
+          PanelHeader(title: t.config.heading, icon: Icons.settings),
           const SizedBox(height: 16.0),
           ...content,
         ],
@@ -218,9 +216,13 @@ class Settings extends ConsumerWidget {
       Consumer(
         builder: (context, ref, child) {
           final validation = ref.watch(placementValidationProvider);
+          final filenameValidation = ref.watch(
+            filenameFormatValidationProvider,
+          );
           final isValid =
               validation.isValid ||
               validation.status == PlacementValidationStatus.unavailable;
+          final canSave = isValid && filenameValidation.isValid;
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -228,7 +230,7 @@ class Settings extends ConsumerWidget {
               Align(
                 alignment: Alignment.centerRight,
                 child: OutlinedButton.icon(
-                  onPressed: isValid ? () => storeConfig(ref) : null,
+                  onPressed: canSave ? () => storeConfig(ref) : null,
                   icon: const Icon(Icons.save),
                   label: Text(t.save),
                 ),

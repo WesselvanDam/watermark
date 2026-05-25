@@ -3,9 +3,9 @@ import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart';
 
-import '../i18n/strings.g.dart';
 import '../features/core/providers/configuration.dart';
 import '../features/core/providers/parameters.dart';
+import 'output_template.dart';
 import 'status.dart';
 
 String generateOutputPath(WidgetRef ref, {Status status = Status.marked}) {
@@ -15,35 +15,27 @@ String generateOutputPath(WidgetRef ref, {Status status = Status.marked}) {
     throw Exception('Output file name format is not set');
   }
 
-  // Replace the placeholders in the output file name format
-  final parameters = [
-    t.workspace.parameters.folder.key,
-    t.workspace.parameters.file.key,
-    t.workspace.parameters.number.key,
-  ];
-  String outputPath = format;
-  for (final parameter in parameters) {
-    final value = ref.read(parameterProvider(parameter));
-    outputPath = outputPath.replaceAll('{{$parameter}}', value);
-  }
-
-  // Replace the status placeholder with the actual status
-  final statusReplacement = switch (status) {
-    Status.marked || Status.keptUnmarked => status.name,
-    _ => '<${Status.marked.name}|${Status.keptUnmarked.name}>',
-  };
-  outputPath = outputPath.replaceAll('{{status}}', statusReplacement);
-  outputPath = join(config.outputPath!, '$outputPath.jpg');
-  // If the status is not marked or unmarked, we can return the output path
-  // immediately, as the directory structure is not needed
+  final outputPath = renderOutputTemplate(
+    format,
+    values: {
+      'folder': ref.read(parameterProvider('folder')),
+      'filename': ref.read(parameterProvider('file')),
+      'number': ref.read(parameterProvider('number')),
+      'status': switch (status) {
+        Status.marked => 'watermarked',
+        Status.keptUnmarked => 'original',
+        _ => '{status}',
+      },
+    },
+  );
+  final resolvedOutputPath = join(config.outputPath!, '$outputPath.jpg');
   if (status != Status.marked && status != Status.keptUnmarked) {
-    return outputPath;
+    return resolvedOutputPath;
   }
 
-  // Otherwise, create the output directory if it does not exist
-  final outputDirectory = dirname(outputPath);
+  final outputDirectory = dirname(resolvedOutputPath);
   if (!Directory(outputDirectory).existsSync()) {
     Directory(outputDirectory).createSync(recursive: true);
   }
-  return outputPath;
+  return resolvedOutputPath;
 }

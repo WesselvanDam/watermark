@@ -4,9 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/providers/parameters.dart';
 
 class ParameterTextField extends ConsumerStatefulWidget {
-  const ParameterTextField({required this.name, super.key});
+  const ParameterTextField({
+    required this.name,
+    this.label,
+    super.key,
+  });
 
   final String name;
+  final String? label;
 
   @override
   ConsumerState<ParameterTextField> createState() => _ParameterState();
@@ -33,10 +38,16 @@ class _ParameterState extends ConsumerState<ParameterTextField> {
     });
     return TextField(
       controller: _controller,
-      decoration: InputDecoration(labelText: widget.name),
+      decoration: InputDecoration(labelText: widget.label ?? widget.name),
       onChanged: (value) {
         ref.read(parameterProvider(widget.name).notifier).update((_) => value);
       },
     );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 }

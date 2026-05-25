@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../i18n/strings.g.dart';
-import '../../../features/core/providers/parameters.dart';
+import '../../../features/core/providers/configuration.dart';
+import '../../../features/core/providers/filename_format_validation.dart';
+import '../../../utils/output_template.dart';
 
 class FilenameFormat extends ConsumerStatefulWidget {
   const FilenameFormat({super.key});
@@ -12,14 +14,74 @@ class FilenameFormat extends ConsumerStatefulWidget {
 }
 
 class _FilenameFormatState extends ConsumerState<FilenameFormat> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = _TemplateTextEditingController();
+    _controller.text =
+        ref.read(configurationProvider).outputFileNameFormat ?? '';
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final param = ref.watch(parameterProvider(t.workspace.parameters.file.key));
+    final format = ref.watch(
+      configurationProvider.select((value) => value.outputFileNameFormat),
+    );
+    final validation = ref.watch(filenameFormatValidationProvider);
+
+    if (_controller.text != (format ?? '')) {
+      _controller.text = format ?? '';
+    }
+
     return TextField(
-      controller: TextEditingController(text: param),
+      controller: _controller,
+      maxLines: null,
+      decoration: InputDecoration(
+        hintText: t.config.output.filenameFormat.placeholder,
+        errorText: validation.message,
+      ),
       onChanged: (value) => ref
-          .read(parameterProvider(t.workspace.parameters.file.key).notifier)
-          .update((_) => value),
+          .read(configurationProvider.notifier)
+          .update((state) => state.copyWith(outputFileNameFormat: value)),
+    );
+  }
+}
+
+class _TemplateTextEditingController extends TextEditingController {
+  @override
+  TextSpan buildTextSpan({
+    required BuildContext context,
+    required bool withComposing,
+    TextStyle? style,
+  }) {
+    final baseStyle = style ?? DefaultTextStyle.of(context).style;
+    final colorScheme = Theme.of(context).colorScheme;
+    return buildOutputTemplateTextSpan(
+      text,
+      baseStyle: baseStyle,
+      placeholderStyles: {
+        'folder': baseStyle.copyWith(color: colorScheme.primary),
+        'filename': baseStyle.copyWith(color: colorScheme.secondary),
+        'number': baseStyle.copyWith(color: colorScheme.tertiary),
+        'status': baseStyle.copyWith(color: colorScheme.error),
+        'original': baseStyle.copyWith(color: Colors.teal),
+      },
+      values: {
+        'folder': '{folder}',
+        'filename': '{filename}',
+        'number': '{number}',
+        'status': '{status}',
+        'original': '{original}',
+      },
+      invalidPlaceholderStyle: baseStyle.copyWith(color: colorScheme.error),
     );
   }
 }

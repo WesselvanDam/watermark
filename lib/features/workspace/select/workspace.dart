@@ -6,14 +6,11 @@ import '../../../utils/placement.dart';
 import '../../../widgets/panel_header.dart';
 import '../../core/providers/configuration.dart';
 import '../../core/providers/placement_validation.dart';
-import '../../core/providers/parameters.dart';
 import '../../core/providers/photos.dart';
 import '../../core/providers/shortcuts.dart';
-import '../../../utils/generateOutputPath.dart';
 import '../../../utils/processPhoto.dart';
 import '../../../utils/status.dart';
 import '../../photo/photoIndex.dart';
-import 'local_widgets/parameter.dart';
 import 'local_widgets/preview.dart';
 
 class Workspace extends ConsumerWidget {
@@ -70,110 +67,41 @@ class Workspace extends ConsumerWidget {
                 icon: Icons.photo_library_outlined,
               ),
               const SizedBox(height: 16.0),
-              Wrap(
-                spacing: 8.0,
-                runSpacing: 8.0,
-                children: [
-                  SizedBox(
-                    width: fieldWidth,
-                    child: ParameterTextField(
-                      name: t.workspace.parameters.folder.key,
-                    ),
-                  ),
-                  SizedBox(
-                    width: fieldWidth,
-                    child: ParameterTextField(
-                      name: t.workspace.parameters.file.key,
-                    ),
-                  ),
-                  SizedBox(
-                    width: fieldWidth,
-                    child: ParameterTextField(
-                      name: t.workspace.parameters.number.key,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12.0),
-              Center(
-                child: SelectableText(
-                  photo.original.path,
-                  style: Theme.of(context).textTheme.labelSmall,
-                ),
-              ),
-              const SizedBox(height: 12.0),
               if (useScrollable)
                 SizedBox(height: 360.0, child: preview)
               else
                 Expanded(child: preview),
               const SizedBox(height: 12.0),
-              Center(
-                child: Consumer(
-                  builder: (context, ref, child) {
-                    final placementValidation = ref.watch(
-                      placementValidationProvider,
-                    );
-                    ref.watch(
-                      configurationProvider.select(
-                        (value) => value.outputFileNameFormat,
-                      ),
-                    );
-                    ref.watch(
-                      parameterProvider(t.workspace.parameters.folder.key),
-                    );
-                    ref.watch(
-                      parameterProvider(t.workspace.parameters.file.key),
-                    );
-                    ref.watch(
-                      parameterProvider(t.workspace.parameters.number.key),
-                    );
-                    return SelectableText(
-                      '${t.config.output.destination.heading}: ${generateOutputPath(ref, status: Status.none)}',
-                      style: Theme.of(context).textTheme.labelSmall,
-                      textAlign: TextAlign.center,
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(height: 12.0),
-              OverflowBar(
-                spacing: 8.0,
-                overflowSpacing: 8.0,
-                alignment: MainAxisAlignment.center,
+              Row(
+                spacing: 16.0,
                 children: [
-                  TextButton.icon(
+                  const Spacer(),
+                  OutlinedButton.icon(
                     onPressed: () => handler(Status.none, -1),
                     icon: const Icon(Icons.arrow_back),
                     label: Text(t.workspace.actions.previous),
+                  ),
+                  Column(
+                    spacing: 8.0,
+                    children: [
+                      FilledButton.icon(
+                        onPressed: () => handler(Status.marked, 1),
+                        icon: const Icon(Icons.arrow_upward),
+                        label: Text(t.workspace.actions.mark),
+                      ),
+                      FilledButton.tonalIcon(
+                        onPressed: () => handler(Status.keptUnmarked, 1),
+                        icon: const Icon(Icons.arrow_downward),
+                        label: Text(t.workspace.actions.dontMark),
+                      ),
+                    ],
                   ),
                   OutlinedButton.icon(
                     onPressed: () => handler(Status.skipped, 1),
                     icon: const Icon(Icons.arrow_forward),
                     label: Text(t.workspace.actions.skip),
                   ),
-                  FilledButton.tonalIcon(
-                    onPressed: () => handler(Status.keptUnmarked, 1),
-                    icon: const Icon(Icons.arrow_downward),
-                    label: Text(t.workspace.actions.dontMark),
-                  ),
-                  FilledButton.icon(
-                    onPressed:
-                        ref.watch(
-                              configurationProvider.select(
-                                (value) => value.watermarkPath == null,
-                              ),
-                            ) ||
-                            ref.watch(
-                                  placementValidationProvider.select(
-                                    (value) => value.status,
-                                  ),
-                                ) ==
-                                PlacementValidationStatus.invalid
-                        ? null
-                        : () => handler(Status.marked, 1),
-                    icon: const Icon(Icons.arrow_upward),
-                    label: Text(t.workspace.actions.mark),
-                  ),
+                  const Spacer(),
                 ],
               ),
               const SizedBox(height: 8.0),
