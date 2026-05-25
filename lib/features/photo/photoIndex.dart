@@ -16,6 +16,9 @@ class PhotoIndex extends _$PhotoIndex {
   }
 
   void update(int Function(int state) update) {
+    if (_maxLenght <= 0) {
+      return;
+    }
     state = (update(state) + _maxLenght) % _maxLenght;
   }
 }

@@ -8,19 +8,31 @@ import '../features/core/providers/parameters.dart';
 import 'output_template.dart';
 import 'status.dart';
 
-String generateOutputPath(WidgetRef ref, {Status status = Status.marked}) {
+String generateOutputPath(
+  WidgetRef ref, {
+  Status status = Status.marked,
+  Map<String, String>? parameterValues,
+}) {
   final config = ref.read(configurationProvider);
   final format = config.outputFileNameFormat;
   if (format == null) {
     throw Exception('Output file name format is not set');
   }
 
+  final values =
+      parameterValues ??
+      {
+        'folder': ref.read(parameterProvider('folder')),
+        'filename': ref.read(parameterProvider('file')),
+        'number': ref.read(parameterProvider('number')),
+      };
+
   final outputPath = renderOutputTemplate(
     format,
     values: {
-      'folder': ref.read(parameterProvider('folder')),
-      'filename': ref.read(parameterProvider('file')),
-      'number': ref.read(parameterProvider('number')),
+      'folder': values['folder'] ?? '',
+      'filename': values['filename'] ?? '',
+      'number': values['number'] ?? '',
       'status': switch (status) {
         Status.marked => 'watermarked',
         Status.keptUnmarked => 'original',

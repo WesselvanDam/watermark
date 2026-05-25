@@ -29,10 +29,8 @@ class WorkspaceShell extends StatelessWidget {
                   child: SafeArea(
                     child: Padding(
                       padding: EdgeInsets.all(16.0),
-                      child: Scrollbar(
-                        child: SingleChildScrollView(
-                          child: Settings(asPanel: true),
-                        ),
+                      child: SingleChildScrollView(
+                        child: Settings(asPanel: true),
                       ),
                     ),
                   ),
@@ -51,10 +49,8 @@ class WorkspaceShell extends StatelessWidget {
                 const SidebarFrame(
                   width: _leftPanelWidth,
                   borderOnRight: true,
-                  child: Scrollbar(
-                    child: SingleChildScrollView(
-                      child: Settings(asPanel: true),
-                    ),
+                  child: SingleChildScrollView(
+                    child: Settings(asPanel: true),
                   ),
                 ),
               const Expanded(child: SelectCanvas()),

@@ -19,6 +19,8 @@ import 'photo_queue_state.dart';
 import 'placement.dart';
 import 'status.dart';
 
+final Map<String, Future<void>> _pendingPhotoActions = {};
+
 img.Image _resize(img.Image image, int? maxDim) {
   if (maxDim == null || maxDim <= 0) {
     return image;
@@ -70,6 +72,14 @@ Future<Photo> _skip(Photo photo) async {
   return photo.copyWith(status: Status.skipped);
 }
 
+Map<String, String> _captureParameterValues(WidgetRef ref) {
+  return {
+    'folder': ref.read(parameterProvider(t.workspace.parameters.folder.key)),
+    'filename': ref.read(parameterProvider(t.workspace.parameters.file.key)),
+    'number': ref.read(parameterProvider(t.workspace.parameters.number.key)),
+  };
+}
+
 Future<Photo> _removeUnmarked(Photo photo) async {
   if (photo.unmarkedPath != null) {
     return File(
@@ -88,28 +98,62 @@ Future<Photo> _removeMarked(Photo photo) async {
   return photo;
 }
 
-Future<Photo> _unmark(Photo photo, WidgetRef ref) async {
-  final config = ref.read(configurationProvider);
-  final unmarkedPath = generateOutputPath(ref, status: Status.keptUnmarked);
+Future<Photo> _unmark(
+  Photo photo,
+  WidgetRef ref, {
+  Config? config,
+  Map<String, String>? parameterValues,
+}) async {
+  final effectiveConfig = config ?? ref.read(configurationProvider);
+  final unmarkedPath = generateOutputPath(
+    ref,
+    status: Status.keptUnmarked,
+    parameterValues: parameterValues,
+  );
   return await compute(_writeUnmarkedFile, {
     'photo': photo,
     'unmarkedPath': unmarkedPath,
-    'config': config,
+    'config': effectiveConfig,
   });
 }
 
-Future<Photo> _mark(Photo photo, WidgetRef ref) async {
-  final config = ref.read(configurationProvider);
-  final markedPath = generateOutputPath(ref);
+Future<Photo> _mark(
+  Photo photo,
+  WidgetRef ref, {
+  Config? config,
+  Map<String, String>? parameterValues,
+}) async {
+  final effectiveConfig = config ?? ref.read(configurationProvider);
+  final markedPath = generateOutputPath(
+    ref,
+    parameterValues: parameterValues,
+  );
   return await compute(_writeMarkedFile, {
     'photo': photo,
     'markedPath': markedPath,
-    'config': config,
+    'config': effectiveConfig,
   });
 }
 
-Future<Photo> _unmarkAndMark(Photo photo, WidgetRef ref) async {
-  return await _unmark(photo, ref).then((value) => _mark(value, ref));
+Future<Photo> _unmarkAndMark(
+  Photo photo,
+  WidgetRef ref, {
+  Config? config,
+  Map<String, String>? parameterValues,
+}) async {
+  return await _unmark(
+    photo,
+    ref,
+    config: config,
+    parameterValues: parameterValues,
+  ).then(
+    (value) => _mark(
+      value,
+      ref,
+      config: config,
+      parameterValues: parameterValues,
+    ),
+  );
 }
 
 Future<Photo> _writeUnmarkedFile(Map<String, dynamic> args) async {
@@ -138,17 +182,36 @@ Future<Photo> _writeMarkedFile(Map<String, dynamic> args) async {
   return photo.copyWith(markedPath: markedPath);
 }
 
-Future<Photo> processPhoto(Photo photo, Status status, WidgetRef ref) async {
+Future<Photo> processPhoto(
+  Photo photo,
+  Status status,
+  WidgetRef ref, {
+  Config? config,
+  Map<String, String>? parameterValues,
+}) async {
   Photo processedPhoto = photo;
   if (photo.status == status || status == Status.none) {
     // The photo is already in the desired state
     return photo;
   }
+  final effectiveConfig = config ?? ref.read(configurationProvider);
+  final effectiveParameterValues =
+      parameterValues ?? _captureParameterValues(ref);
   if (photo.status == Status.none) {
     // The photo has not been processed yet
     processedPhoto = switch (status) {
-      Status.marked => await _unmarkAndMark(photo, ref),
-      Status.keptUnmarked => await _unmark(photo, ref),
+      Status.marked => await _unmarkAndMark(
+        photo,
+        ref,
+        config: effectiveConfig,
+        parameterValues: effectiveParameterValues,
+      ),
+      Status.keptUnmarked => await _unmark(
+        photo,
+        ref,
+        config: effectiveConfig,
+        parameterValues: effectiveParameterValues,
+      ),
       Status.skipped => await _skip(photo),
       Status.none => photo,
     };
@@ -165,13 +228,27 @@ Future<Photo> processPhoto(Photo photo, Status status, WidgetRef ref) async {
     processedPhoto = await _mark(photo, ref);
   } else if (status == Status.keptUnmarked && photo.status == Status.skipped) {
     // The photo was skipped before, so we need to unmark it
-    processedPhoto = await _unmark(photo, ref);
+    processedPhoto = await _unmark(
+      photo,
+      ref,
+      config: effectiveConfig,
+      parameterValues: effectiveParameterValues,
+    );
   } else if (status == Status.marked && photo.status == Status.skipped) {
     // The photo was skipped before, so we need to mark and unmark it
     processedPhoto = await _unmark(
       photo,
       ref,
-    ).then((value) => _mark(value, ref));
+      config: effectiveConfig,
+      parameterValues: effectiveParameterValues,
+    ).then(
+      (value) => _mark(
+        value,
+        ref,
+        config: effectiveConfig,
+        parameterValues: effectiveParameterValues,
+      ),
+    );
   }
   // Update the status of the photo
   return processedPhoto.copyWith(status: status);
@@ -185,13 +262,42 @@ Future<void> processAction(
   Status status,
   int change,
 ) async {
-  // Process the photo with the given status
-  processPhoto(photo, status, ref).then((updatedPhoto) {
-    debugPrint('Updated photo: $updatedPhoto');
-    ref
-        .read(photosProvider.notifier)
-        .updateAtIndex(index, (photo) => updatedPhoto);
+  final parameterValues = _captureParameterValues(ref);
+  final config = ref.read(configurationProvider);
+  final photoKey = photo.original.path;
+
+  final previousAction = _pendingPhotoActions[photoKey] ?? Future<void>.value();
+  final action = previousAction
+      .catchError((Object error, StackTrace stackTrace) {
+        debugPrint('Previous photo action failed for $photoKey: $error');
+      })
+      .then((_) async {
+        try {
+          final updatedPhoto = await processPhoto(
+            photo,
+            status,
+            ref,
+            config: config,
+            parameterValues: parameterValues,
+          );
+          debugPrint('Updated photo: $updatedPhoto');
+          ref
+              .read(photosProvider.notifier)
+              .updateAtIndex(index, (_) => updatedPhoto);
+        } catch (error, stackTrace) {
+          debugPrint('Photo action failed for $photoKey: $error');
+          debugPrint(stackTrace.toString());
+        }
+      });
+
+  late final Future<void> trackedAction;
+  trackedAction = action.whenComplete(() {
+    if (identical(_pendingPhotoActions[photoKey], trackedAction)) {
+      _pendingPhotoActions.remove(photoKey);
+    }
   });
+
+  _pendingPhotoActions[photoKey] = trackedAction;
 
   final photos = ref.read(photosProvider);
   final shouldAdvance = shouldAdvancePhotoIndex(index, photos.length, change);
