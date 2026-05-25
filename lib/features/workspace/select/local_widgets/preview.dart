@@ -6,7 +6,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../models/config.dart';
 import '../../../core/providers/configuration.dart';
+import '../../../core/providers/placement_validation.dart';
 import '../../../core/providers/watermark.dart';
+import '../../../../utils/placement.dart';
 
 class ImagePreview extends ConsumerStatefulWidget {
   const ImagePreview({required this.image, super.key});
@@ -18,15 +20,31 @@ class ImagePreview extends ConsumerStatefulWidget {
 }
 
 class _ImagePreviewState extends ConsumerState<ImagePreview> {
+  late Future<ui.Image> _imageFuture;
+
   Future<ui.Image> _getImage() async {
     final bytes = await widget.image.readAsBytes();
     return await decodeImageFromList(bytes);
   }
 
   @override
+  void initState() {
+    super.initState();
+    _imageFuture = _getImage();
+  }
+
+  @override
+  void didUpdateWidget(covariant ImagePreview oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.image.path != widget.image.path) {
+      _imageFuture = _getImage();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return FutureBuilder<ui.Image>(
-      future: _getImage(),
+      future: _imageFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const CircularProgressIndicator();
@@ -47,6 +65,7 @@ class _ImagePreviewState extends ConsumerState<ImagePreview> {
                     size: Size(width, height),
                     painter: ImagePainter(image: image),
                   ),
+                  // Overlay watermark only watches watermark/configuration providers
                   Consumer(
                     builder: (context, ref, child) {
                       final watermark = ref.watch(
@@ -56,14 +75,62 @@ class _ImagePreviewState extends ConsumerState<ImagePreview> {
                         return const SizedBox();
                       }
                       final config = ref.watch(configurationProvider);
-                      return CustomPaint(
-                        size: Size(width, height),
-                        painter: WatermarkPainter(
-                          watermark: watermark,
-                          config: config,
-                          imageWidth: image.width.toDouble(),
-                          imageHeight: image.height.toDouble(),
-                        ),
+                      final placementValidation = ref.watch(
+                        placementValidationProvider,
+                      );
+                      return Stack(
+                        children: [
+                          CustomPaint(
+                            size: Size(width, height),
+                            painter: WatermarkPainter(
+                              watermark: watermark,
+                              config: config,
+                              imageWidth: image.width.toDouble(),
+                              imageHeight: image.height.toDouble(),
+                            ),
+                          ),
+                          if (placementValidation.status ==
+                              PlacementValidationStatus.invalid)
+                            Positioned.fill(
+                              child: IgnorePointer(
+                                child: Align(
+                                  alignment: Alignment.topLeft,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: DecoratedBox(
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .errorContainer
+                                            .withOpacity(0.9),
+                                        borderRadius: BorderRadius.circular(
+                                          12.0,
+                                        ),
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12.0,
+                                          vertical: 8.0,
+                                        ),
+                                        child: Text(
+                                          placementValidation.message ??
+                                              'Invalid placement',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .labelSmall
+                                              ?.copyWith(
+                                                color: Theme.of(
+                                                  context,
+                                                ).colorScheme.onErrorContainer,
+                                              ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
                       );
                     },
                   ),
@@ -93,7 +160,7 @@ class ImagePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
+    return oldDelegate is! ImagePainter || oldDelegate.image != image;
   }
 }
 
@@ -112,26 +179,31 @@ class WatermarkPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final watermarkWidth = watermark.width.toDouble();
-    final watermarkHeight = watermark.height.toDouble();
+    final placement = validatePlacement(
+      imageWidth: imageWidth,
+      imageHeight: imageHeight,
+      watermarkSourceWidth: watermark.width.toDouble(),
+      watermarkSourceHeight: watermark.height.toDouble(),
+      config: config,
+    );
+    final rect = placement.rect;
+    if (rect == null) {
+      return;
+    }
 
+    final scaleX = size.width / imageWidth;
+    final scaleY = size.height / imageHeight;
     final watermarkSrcRect = Rect.fromLTWH(
       0,
       0,
-      watermarkWidth,
-      watermarkHeight,
+      watermark.width.toDouble(),
+      watermark.height.toDouble(),
     );
-
-    final width =
-        imageWidth * config.watermarkWidthFraction * size.width / imageWidth;
-    final height = width * (watermarkHeight / watermarkWidth);
     final watermarkDstRect = Rect.fromLTWH(
-      (imageWidth * config.watermarkLeftFraction) * size.width / imageWidth -
-          width,
-      (imageHeight * config.watermarkTopFraction) * size.height / imageHeight -
-          height,
-      width,
-      height,
+      rect.left * scaleX,
+      rect.top * scaleY,
+      rect.width * scaleX,
+      rect.height * scaleY,
     );
     canvas.drawImageRect(
       watermark,
@@ -143,6 +215,10 @@ class WatermarkPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
+    return oldDelegate is! WatermarkPainter ||
+        oldDelegate.watermark != watermark ||
+        oldDelegate.config != config ||
+        oldDelegate.imageWidth != imageWidth ||
+        oldDelegate.imageHeight != imageHeight;
   }
 }

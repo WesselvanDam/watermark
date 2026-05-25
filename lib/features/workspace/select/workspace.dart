@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../i18n/strings.g.dart';
+import '../../../utils/placement.dart';
+import '../../../widgets/panel_header.dart';
 import '../../core/providers/configuration.dart';
+import '../../core/providers/placement_validation.dart';
 import '../../core/providers/parameters.dart';
 import '../../core/providers/photos.dart';
 import '../../core/providers/shortcuts.dart';
@@ -13,8 +16,8 @@ import '../../photo/photoIndex.dart';
 import 'local_widgets/parameter.dart';
 import 'local_widgets/preview.dart';
 
-class Select extends ConsumerWidget {
-  const Select({super.key});
+class Workspace extends ConsumerWidget {
+  const Workspace({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -28,7 +31,6 @@ class Select extends ConsumerWidget {
         return value[index];
       }),
     );
-    debugPrint('Index: $index. Photo: $photo');
 
     if (photo == null) {
       return const SizedBox();
@@ -63,11 +65,11 @@ class Select extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisSize: useScrollable ? MainAxisSize.min : MainAxisSize.max,
             children: [
-              Text(
-                t.select.heading,
-                style: Theme.of(context).textTheme.headlineLarge,
+              PanelHeader(
+                title: t.workspace.heading,
+                icon: Icons.photo_library_outlined,
               ),
-              const SizedBox(height: 12.0),
+              const SizedBox(height: 16.0),
               Wrap(
                 spacing: 8.0,
                 runSpacing: 8.0,
@@ -75,33 +77,20 @@ class Select extends ConsumerWidget {
                   SizedBox(
                     width: fieldWidth,
                     child: ParameterTextField(
-                      name: t.select.parameters.folder.key,
+                      name: t.workspace.parameters.folder.key,
                     ),
                   ),
                   SizedBox(
                     width: fieldWidth,
                     child: ParameterTextField(
-                      name: t.select.parameters.file.key,
+                      name: t.workspace.parameters.file.key,
                     ),
                   ),
                   SizedBox(
                     width: fieldWidth,
                     child: ParameterTextField(
-                      name: t.select.parameters.number.key,
+                      name: t.workspace.parameters.number.key,
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12.0),
-              Row(
-                children: [
-                  Text(
-                    t.progress(current: index + 1, total: total),
-                    style: Theme.of(context).textTheme.labelMedium,
-                  ),
-                  const SizedBox(width: 8.0),
-                  Expanded(
-                    child: LinearProgressIndicator(value: progressValue),
                   ),
                 ],
               ),
@@ -119,39 +108,24 @@ class Select extends ConsumerWidget {
                 Expanded(child: preview),
               const SizedBox(height: 12.0),
               Center(
-                child: Chip(
-                  label: Text('Status: ${photo.status.name}'),
-                  backgroundColor: {
-                    Status.none: Theme.of(
-                      context,
-                    ).colorScheme.surfaceContainerHigh,
-                    Status.skipped: Theme.of(
-                      context,
-                    ).colorScheme.tertiaryContainer,
-                    Status.keptUnmarked: Theme.of(
-                      context,
-                    ).colorScheme.secondaryContainer,
-                    Status.marked: Theme.of(
-                      context,
-                    ).colorScheme.primaryContainer,
-                  }[photo.status],
-                ),
-              ),
-              const SizedBox(height: 8.0),
-              Center(
                 child: Consumer(
                   builder: (context, ref, child) {
+                    final placementValidation = ref.watch(
+                      placementValidationProvider,
+                    );
                     ref.watch(
                       configurationProvider.select(
                         (value) => value.outputFileNameFormat,
                       ),
                     );
                     ref.watch(
-                      parameterProvider(t.select.parameters.folder.key),
+                      parameterProvider(t.workspace.parameters.folder.key),
                     );
-                    ref.watch(parameterProvider(t.select.parameters.file.key));
                     ref.watch(
-                      parameterProvider(t.select.parameters.number.key),
+                      parameterProvider(t.workspace.parameters.file.key),
+                    );
+                    ref.watch(
+                      parameterProvider(t.workspace.parameters.number.key),
                     );
                     return SelectableText(
                       '${t.config.output.destination.heading}: ${generateOutputPath(ref, status: Status.none)}',
@@ -170,29 +144,35 @@ class Select extends ConsumerWidget {
                   TextButton.icon(
                     onPressed: () => handler(Status.none, -1),
                     icon: const Icon(Icons.arrow_back),
-                    label: Text(t.select.actions.previous),
+                    label: Text(t.workspace.actions.previous),
                   ),
                   OutlinedButton.icon(
                     onPressed: () => handler(Status.skipped, 1),
                     icon: const Icon(Icons.arrow_forward),
-                    label: Text(t.select.actions.skip),
+                    label: Text(t.workspace.actions.skip),
                   ),
                   FilledButton.tonalIcon(
                     onPressed: () => handler(Status.keptUnmarked, 1),
                     icon: const Icon(Icons.arrow_downward),
-                    label: Text(t.select.actions.dontMark),
+                    label: Text(t.workspace.actions.dontMark),
                   ),
                   FilledButton.icon(
                     onPressed:
                         ref.watch(
-                          configurationProvider.select(
-                            (value) => value.watermarkPath == null,
-                          ),
-                        )
+                              configurationProvider.select(
+                                (value) => value.watermarkPath == null,
+                              ),
+                            ) ||
+                            ref.watch(
+                                  placementValidationProvider.select(
+                                    (value) => value.status,
+                                  ),
+                                ) ==
+                                PlacementValidationStatus.invalid
                         ? null
                         : () => handler(Status.marked, 1),
                     icon: const Icon(Icons.arrow_upward),
-                    label: Text(t.select.actions.mark),
+                    label: Text(t.workspace.actions.mark),
                   ),
                 ],
               ),

@@ -28,23 +28,27 @@
       }
     },
     "placement": {
-      "heading": "Placement",
+      "heading": "Watermark Placement",
+      "anchorPoint": {
+        "heading": "Anchor Point",
+        "info": "The point on the watermark image that will be used as the reference point for positioning the watermark on the photo. For example, if you choose 'Bottom Right', the bottom right corner of the watermark will be placed at the position determined by the horizontal and vertical offsets."
+      },
       "leftFraction": {
-        "heading": "Left fraction",
-        "info": "The fraction of the image width that determines the distance from the left edge of the image to the right edge of the watermark. The value must be between 0 and 1. For example, 0.9 means that the right side of the watermark will be placed at 90% of the image width from the left edge."
+        "heading": "Horizontal Offset",
+        "info": "The fraction of the image width that determines the distance from the left edge of the image to the anchor point of the watermark. For example, 90% means that the anchor point of the watermark will be placed at 90% of the image width from the left edge."
       },
       "topFraction": {
-        "heading": "Top fraction",
-        "info": "The fraction of the image height that determines the distance from the top edge of the image to the bottom edge of the watermark. The value must be between 0 and 1. For example, 0.9 means that the bottom side of the watermark will be placed at 90% of the image height from the top edge."
+        "heading": "Vertical Offset",
+        "info": "The fraction of the image height that determines the distance from the top edge of the image to the anchor point of the watermark. For example, 90% means that the anchor point of the watermark will be placed at 90% of the image height from the top edge."
       },
       "widthFraction": {
-        "heading": "Width fraction",
-        "info": "The fraction of the image width that determines the width of the watermark. The value must be between 0 and 1. For example, 0.1 means that the width of the watermark will be 10% of the image width."
+        "heading": "Watermark Width",
+        "info": "The fraction of the image width that determines the width of the watermark. The value must be between 0 and 1. For example, 10% means that the width of the watermark will be 10% of the image width."
       }
     }
   },
-  "select": {
-    "heading": "Select",
+  "workspace": {
+    "heading": "Workspace",
     "parameters": {
       "folder": {
         "key": "folder",

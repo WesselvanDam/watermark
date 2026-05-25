@@ -13,6 +13,8 @@ abstract class Config with _$Config {
     @Default(0.99) double watermarkLeftFraction,
     @Default(0.99) double watermarkTopFraction,
     @Default(0.2) double watermarkWidthFraction,
+    @Default(1.0) double watermarkAnchorX,
+    @Default(1.0) double watermarkAnchorY,
   }) = _Config;
 
   factory Config.fromJson(Map<String, dynamic> json) => _$ConfigFromJson(json);

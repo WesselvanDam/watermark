@@ -17,6 +17,14 @@ class PlacementSlider extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final value = displayCallback(ref.read(configurationProvider));
-    return Slider(value: value, onChanged: onChanged);
+    final percentageValue = value * 100;
+    return Slider(
+      padding: const EdgeInsets.only(right: 16.0),
+      max: 100,
+      divisions: 100,
+      value: percentageValue,
+      label: '${percentageValue.round()}%',
+      onChanged: (sliderValue) => onChanged(sliderValue / 100),
+    );
   }
 }

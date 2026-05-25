@@ -4,6 +4,7 @@ import 'package:image/image.dart' as img;
 
 import '../models/config.dart';
 import '../models/photo.dart';
+import 'placement.dart';
 
 Future<img.Image> resizeImage(img.Image image, Config config) async {
   const maxDim = 1920;
@@ -19,26 +20,32 @@ Future<img.Image> resizeImage(img.Image image, Config config) async {
 
 Future<img.Image> markImage(Photo photo, Config config) async {
   final original = img.decodeImage(photo.original.readAsBytesSync())!;
-  final watermark =
-      img.decodeImage(File(config.watermarkPath!).readAsBytesSync())!;
+  final watermark = img.decodeImage(
+    File(config.watermarkPath!).readAsBytesSync(),
+  )!;
 
   final resizedOriginal = await resizeImage(original, config);
   final resizedWatermark = await resizeImage(watermark, config);
 
-  final watermarkWidth = resizedOriginal.width * config.watermarkWidthFraction;
-  final watermarkHeight =
-      watermarkWidth / resizedWatermark.width * resizedWatermark.height;
-  final watermarkLeft =
-      (resizedOriginal.width * config.watermarkLeftFraction) - watermarkWidth;
-  final watermarkTop =
-      (resizedOriginal.height * config.watermarkTopFraction) - watermarkHeight;
+  final placement = validatePlacement(
+    imageWidth: resizedOriginal.width.toDouble(),
+    imageHeight: resizedOriginal.height.toDouble(),
+    watermarkSourceWidth: resizedWatermark.width.toDouble(),
+    watermarkSourceHeight: resizedWatermark.height.toDouble(),
+    config: config,
+  );
+  if (!placement.isValid || placement.rect == null) {
+    throw StateError(placement.message ?? 'Invalid watermark placement.');
+  }
+
+  final rect = placement.rect!;
   img.compositeImage(
     resizedOriginal,
     resizedWatermark,
-    dstX: watermarkLeft.toInt(),
-    dstY: watermarkTop.toInt(),
-    dstW: watermarkWidth.toInt(),
-    dstH: watermarkHeight.toInt(),
+    dstX: rect.left.toInt(),
+    dstY: rect.top.toInt(),
+    dstW: rect.width.toInt(),
+    dstH: rect.height.toInt(),
   );
 
   return resizedOriginal;

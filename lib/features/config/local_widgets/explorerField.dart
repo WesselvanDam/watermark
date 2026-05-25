@@ -30,6 +30,10 @@ class _ExplorerFieldState extends ConsumerState<ExplorerField> {
     _controller = TextEditingController(
       text: widget.displayCallback(ref.read(configurationProvider)),
     );
+
+    _controller.selection = TextSelection.fromPosition(
+      TextPosition(offset: _controller.text.length),
+    );
   }
 
   @override
@@ -40,15 +44,26 @@ class _ExplorerFieldState extends ConsumerState<ExplorerField> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () async {
-        final path = await _selectPath(context, ref);
-        widget.onPathSelected(path);
-        _controller.text = path ?? '';
-      },
-      child: AbsorbPointer(
-        child: TextField(readOnly: true, controller: _controller),
-      ),
+    return Row(
+      children: [
+        Expanded(
+          child: TextField(
+            controller: _controller,
+            readOnly: true,
+          ),
+        ),
+        const SizedBox(width: 8.0),
+        OutlinedButton(
+          onPressed: () async {
+            final path = await _selectPath(context, ref);
+            if (path == null) return;
+
+            widget.onPathSelected(path);
+            _controller.text = path;
+          },
+          child: const Text('Browse'),
+        ),
+      ],
     );
   }
 

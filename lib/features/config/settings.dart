@@ -5,7 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../i18n/strings.g.dart';
+import '../../utils/placement.dart';
+import '../../widgets/panel_header.dart';
 import '../core/providers/configuration.dart';
+import '../core/providers/placement_validation.dart';
 import '../core/providers/prefs.dart';
 import 'local_widgets/explorerField.dart';
 import 'local_widgets/filenameFormat.dart';
@@ -49,8 +52,11 @@ class Settings extends ConsumerWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(t.config.heading, style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: 12.0),
+          PanelHeader(
+            title: t.config.heading,
+            icon: Icons.settings,
+          ),
+          const SizedBox(height: 16.0),
           ...content,
         ],
       );
@@ -96,7 +102,7 @@ class Settings extends ConsumerWidget {
         ),
         t.config.input.watermark.info,
       ),
-      const SizedBox(height: 16.0),
+      const SizedBox(height: 32.0),
       heading(context, t.config.output.heading),
       const Divider(),
       row(
@@ -118,9 +124,63 @@ class Settings extends ConsumerWidget {
         const FilenameFormat(),
         t.config.output.filenameFormat.info,
       ),
-      const SizedBox(height: 16.0),
+      const SizedBox(height: 32.0),
       heading(context, t.config.placement.heading),
       const Divider(),
+      row(
+        context,
+        t.config.placement.anchorPoint.heading,
+        Builder(
+          builder: (context) {
+            final cfg = ref.watch(configurationProvider);
+            final anchorX = cfg.watermarkAnchorX;
+            final anchorY = cfg.watermarkAnchorY;
+
+            Widget buttonFor(int col, int row) {
+              final x = col / 2.0; // 0, 0.5, 1
+              final y = row / 2.0;
+              final selected = anchorX == x && anchorY == y;
+              return Padding(
+                padding: const EdgeInsets.all(0),
+                child: OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    backgroundColor: selected
+                        ? Theme.of(context).colorScheme.primaryContainer
+                        : null,
+                    minimumSize: const Size(40, 40),
+                    padding: EdgeInsets.zero,
+                  ),
+                  onPressed: () => ref
+                      .read(configurationProvider.notifier)
+                      .update(
+                        (state) => state.copyWith(
+                          watermarkAnchorX: x,
+                          watermarkAnchorY: y,
+                        ),
+                      ),
+                  child: Icon(
+                    Icons.circle,
+                    size: 10,
+                    color: selected
+                        ? Theme.of(context).colorScheme.onPrimaryContainer
+                        : Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              );
+            }
+
+            return Row(
+              children: [
+                for (var r = 0; r < 3; r++)
+                  Column(
+                    children: [for (var c = 0; c < 3; c++) buttonFor(c, r)],
+                  ),
+              ],
+            );
+          },
+        ),
+        t.config.placement.anchorPoint.info,
+      ),
       row(
         context,
         t.config.placement.leftFraction.heading,
@@ -154,39 +214,65 @@ class Settings extends ConsumerWidget {
         ),
         t.config.placement.widthFraction.info,
       ),
-      Align(
-        alignment: Alignment.centerRight,
-        child: OutlinedButton.icon(
-          onPressed: () => storeConfig(ref),
-          icon: const Icon(Icons.save),
-          label: Text(t.save),
-        ),
+      const SizedBox(height: 16.0),
+      Consumer(
+        builder: (context, ref, child) {
+          final validation = ref.watch(placementValidationProvider);
+          final isValid =
+              validation.isValid ||
+              validation.status == PlacementValidationStatus.unavailable;
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Align(
+                alignment: Alignment.centerRight,
+                child: OutlinedButton.icon(
+                  onPressed: isValid ? () => storeConfig(ref) : null,
+                  icon: const Icon(Icons.save),
+                  label: Text(t.save),
+                ),
+              ),
+            ],
+          );
+        },
       ),
       const SizedBox(height: 16.0),
     ];
   }
 
   Widget heading(BuildContext context, String text) {
-    return Text(text, style: Theme.of(context).textTheme.titleLarge);
+    final textTheme = Theme.of(context).textTheme;
+    return Text(
+      text.toUpperCase(),
+      style: textTheme.labelLarge?.copyWith(
+        color: Theme.of(context).colorScheme.onSurface,
+        fontWeight: FontWeight.bold,
+      ),
+    );
   }
 
   Widget row(BuildContext context, String label, Widget child, String info) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final labelWidget = Tooltip(
-          message: info,
-          textStyle: Theme.of(context).tooltipTheme.textStyle?.copyWith(
-            fontSize: Theme.of(context).textTheme.labelLarge?.fontSize,
-          ),
-          margin: const EdgeInsets.symmetric(horizontal: 48.0),
-          padding: const EdgeInsets.all(16.0),
-          child: Text(label, style: Theme.of(context).textTheme.labelLarge),
+        final labelStyle = Theme.of(context).textTheme.labelSmall;
+        final labelWidget = Row(
+          children: [
+            Text(label.toUpperCase(), style: labelStyle),
+            IconButton(
+              icon: const Icon(Icons.info_outline, size: 16),
+              onPressed: null,
+              padding: EdgeInsets.zero,
+              visualDensity: VisualDensity.compact,
+              tooltip: info,
+            ),
+          ],
         );
 
         if (constraints.maxWidth < 360) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [labelWidget, const SizedBox(height: 8.0), child],
+            children: [labelWidget, child],
           );
         }
 

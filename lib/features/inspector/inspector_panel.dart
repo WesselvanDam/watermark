@@ -9,90 +9,11 @@ import 'package:path/path.dart' as path;
 
 import '../../models/photo.dart';
 import '../../utils/status.dart';
+import '../../widgets/panel_header.dart';
 import '../core/providers/photos.dart';
 import '../photo/photoIndex.dart';
 
 const int _recentQueueLimit = 5;
-
-final photoMetadataProvider = FutureProvider.family<_PhotoMetadata, String>((
-  ref,
-  imagePath,
-) async {
-  final file = File(imagePath);
-  final bytes = await file.readAsBytes();
-
-  int? width;
-  int? height;
-  DateTime? takenAt;
-
-  ui.decodeImageFromList(bytes, (image) {
-    width = image.width;
-    height = image.height;
-    image.dispose();
-  });
-
-  try {
-    final exifData = await readExifFromBytes(bytes);
-    takenAt = _extractExifDate(exifData);
-  } catch (_) {
-    takenAt = null;
-  }
-
-  return _PhotoMetadata(width: width, height: height, takenAt: takenAt);
-});
-
-class _PhotoMetadata {
-  const _PhotoMetadata({this.width, this.height, this.takenAt});
-
-  final int? width;
-  final int? height;
-  final DateTime? takenAt;
-
-  String get dimensionsLabel {
-    if (width == null || height == null) {
-      return '---';
-    }
-    return '$width × $height';
-  }
-}
-
-DateTime? _extractExifDate(Map<String, IfdTag> exifData) {
-  const keys = [
-    'EXIF DateTimeOriginal',
-    'EXIF DateTimeDigitized',
-    'Image DateTime',
-    'EXIF DateTime',
-  ];
-  for (final key in keys) {
-    final tag = exifData[key];
-    if (tag == null) {
-      continue;
-    }
-    final parsed = _parseExifDate(tag.printable);
-    if (parsed != null) {
-      return parsed;
-    }
-  }
-  return null;
-}
-
-DateTime? _parseExifDate(String raw) {
-  final match = RegExp(
-    r'^(\d{4}):(\d{2}):(\d{2}) (\d{2}):(\d{2}):(\d{2})',
-  ).firstMatch(raw.trim());
-  if (match == null) {
-    return null;
-  }
-
-  return DateTime(
-    int.parse(match.group(1)!),
-    int.parse(match.group(2)!),
-    int.parse(match.group(3)!),
-    int.parse(match.group(4)!),
-    int.parse(match.group(5)!),
-    int.parse(match.group(6)!),
-  );
-}
 
 String _formatTakenAt(DateTime? date) {
   if (date == null) {
@@ -178,7 +99,7 @@ class InspectorPanel extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const _PanelHeader(title: 'Inspector', icon: Icons.info_outline),
+        const PanelHeader(title: 'Details', icon: Icons.data_object),
         Expanded(
           child: ListView(
             padding: const EdgeInsets.all(16.0),
@@ -187,25 +108,7 @@ class InspectorPanel extends ConsumerWidget {
                 title: 'Metadata',
                 child: photo == null
                     ? const _EmptyState(message: 'No photo selected.')
-                    : ref
-                          .watch(photoMetadataProvider(photo.original.path))
-                          .when(
-                            data: (metadata) => _MetadataRows(
-                              photo: photo,
-                              metadata: metadata,
-                              isLoading: false,
-                            ),
-                            loading: () => _MetadataRows(
-                              photo: photo,
-                              metadata: null,
-                              isLoading: true,
-                            ),
-                            error: (error, stackTrace) => _MetadataRows(
-                              photo: photo,
-                              metadata: null,
-                              isLoading: false,
-                            ),
-                          ),
+                    : _MetadataRows(photo: photo),
               ),
               const SizedBox(height: 16.0),
               _Section(
@@ -219,41 +122,11 @@ class InspectorPanel extends ConsumerWidget {
                         ],
                       ),
               ),
-              const SizedBox(height: 16.0),
-              const _Section(
-                title: 'Custom Prefix Variable',
-                child: TextField(
-                  enabled: false,
-                  decoration: InputDecoration(hintText: 'e.g. ClientName_'),
-                ),
-              ),
             ],
           ),
         ),
         _ProgressSection(current: current, total: total, progress: progress),
       ],
-    );
-  }
-}
-
-class _PanelHeader extends StatelessWidget {
-  const _PanelHeader({required this.title, required this.icon});
-
-  final String title;
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Row(
-        children: [
-          Icon(icon, size: 20),
-          const SizedBox(width: 8.0),
-          Text(title, style: textTheme.titleMedium),
-        ],
-      ),
     );
   }
 }
@@ -279,32 +152,21 @@ class _Section extends StatelessWidget {
 }
 
 class _MetadataRows extends StatelessWidget {
-  const _MetadataRows({
-    required this.photo,
-    required this.metadata,
-    required this.isLoading,
-  });
+  const _MetadataRows({required this.photo});
 
   final Photo photo;
-  final _PhotoMetadata? metadata;
-  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final statusInfo = _statusPresentation(photo.status, colorScheme);
-    final dimensions =
-        metadata?.dimensionsLabel ?? (isLoading ? 'Loading...' : '---');
-    final takenAt = metadata == null
-        ? (isLoading ? 'Loading...' : '---')
-        : _formatTakenAt(metadata?.takenAt);
+    final lastModified = _formatTakenAt(photo.original.lastModifiedSync());
 
     return Column(
       children: [
         _MetaRow(label: 'Filename', value: path.basename(photo.original.path)),
-        _MetaRow(label: 'Dimensions', value: dimensions),
-        _MetaRow(label: 'Date Taken', value: takenAt),
+        _MetaRow(label: 'Last Modified', value: lastModified),
         _MetaRow(
           label: 'Status',
           valueWidget: Row(

@@ -21,7 +21,7 @@ class Configuration extends _$Configuration with NotifierUpdater<Config> {
     }
     return Config(
       outputFileNameFormat:
-          '{{${t.select.parameters.folder.key}}}$separator{{status}}$separator{{${t.select.parameters.file.key}}}_{{${t.select.parameters.number.key}}}',
+          '{{${t.workspace.parameters.folder.key}}}$separator{{status}}$separator{{${t.workspace.parameters.file.key}}}_{{${t.workspace.parameters.number.key}}}',
     );
   }
 }

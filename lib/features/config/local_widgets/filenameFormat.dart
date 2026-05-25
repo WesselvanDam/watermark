@@ -14,11 +14,11 @@ class FilenameFormat extends ConsumerStatefulWidget {
 class _FilenameFormatState extends ConsumerState<FilenameFormat> {
   @override
   Widget build(BuildContext context) {
-    final param = ref.watch(parameterProvider(t.select.parameters.file.key));
+    final param = ref.watch(parameterProvider(t.workspace.parameters.file.key));
     return TextField(
       controller: TextEditingController(text: param),
       onChanged: (value) => ref
-          .read(parameterProvider(t.select.parameters.file.key).notifier)
+          .read(parameterProvider(t.workspace.parameters.file.key).notifier)
           .update((_) => value),
     );
   }

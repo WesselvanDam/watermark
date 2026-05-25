@@ -17,9 +17,9 @@ String generateOutputPath(WidgetRef ref, {Status status = Status.marked}) {
 
   // Replace the placeholders in the output file name format
   final parameters = [
-    t.select.parameters.folder.key,
-    t.select.parameters.file.key,
-    t.select.parameters.number.key,
+    t.workspace.parameters.folder.key,
+    t.workspace.parameters.file.key,
+    t.workspace.parameters.number.key,
   ];
   String outputPath = format;
   for (final parameter in parameters) {

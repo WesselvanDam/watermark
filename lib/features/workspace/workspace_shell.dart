@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../config/settings.dart';
 import '../inspector/inspector_panel.dart';
-import 'select/select.dart';
+import 'select/workspace.dart';
 
 const double _leftPanelWidth = 320.0;
 const double _rightPanelWidth = 320.0;
 const double _fullShellBreakpoint = 1280.0;
-const double _leftOnlyBreakpoint = 960.0;
+const double _leftOnlyBreakpoint = 768.0;
 
 class WorkspaceShell extends StatelessWidget {
   const WorkspaceShell({super.key});
@@ -97,7 +97,7 @@ class SelectCanvas extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     return ColoredBox(
       color: colorScheme.surface,
-      child: const SafeArea(left: false, right: false, child: Select()),
+      child: const SafeArea(left: false, right: false, child: Workspace()),
     );
   }
 }
@@ -123,7 +123,7 @@ class SidebarFrame extends StatelessWidget {
     return Container(
       width: width,
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest,
+        color: colorScheme.surfaceContainer,
         border: Border(
           left: borderOnLeft ? borderSide : BorderSide.none,
           right: borderOnRight ? borderSide : BorderSide.none,

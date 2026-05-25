@@ -5,10 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final class RiverpodProviderObserver extends ProviderObserver {
   @override
-  void didAddProvider(
-    ProviderObserverContext context,
-    Object? value,
-  ) =>
+  void didAddProvider(ProviderObserverContext context, Object? value) =>
       debugPrint(
         '\x1B[34m'
         '${context.provider} Added'
@@ -16,39 +13,40 @@ final class RiverpodProviderObserver extends ProviderObserver {
       );
 
   @override
-  void didDisposeProvider(
-    ProviderObserverContext context,
-  ) =>
-      debugPrint(
-        '\x1B[35m'
-        '${context.provider} Disposed'
-        '\x1B[0m',
-      );
+  void didDisposeProvider(ProviderObserverContext context) => debugPrint(
+    '\x1B[35m'
+    '${context.provider} Disposed'
+    '\x1B[0m',
+  );
 
   @override
   void didUpdateProvider(
     ProviderObserverContext context,
     Object? previousValue,
     Object? newValue,
-  ) =>
-      debugPrint(
-        '\x1B[33m'
-        '${context.provider} Updated:\n'
-        '\tPrevious Value: $previousValue\n'
-        '\tNew Value: $newValue\n'
-        '\x1B[0m',
-      );
+  ) => context.provider.name == 'photosProvider'
+      ? debugPrint(
+          '\x1B[36m'
+          '${context.provider} Updated.\n'
+          '\x1B[0m',
+        )
+      : debugPrint(
+          '\x1B[33m'
+          '${context.provider} Updated:\n'
+          '\tPrevious Value: $previousValue\n'
+          '\tNew Value: $newValue\n'
+          '\x1B[0m',
+        );
 
   @override
   void providerDidFail(
     ProviderObserverContext context,
     Object error,
     StackTrace stackTrace,
-  ) =>
-      debugPrint(
-        '\x1B[31m'
-        '$stackTrace\n'
-        '${context.provider} Error: $error\n'
-        '\x1B[0m',
-      );
+  ) => debugPrint(
+    '\x1B[31m'
+    '$stackTrace\n'
+    '${context.provider} Error: $error\n'
+    '\x1B[0m',
+  );
 }

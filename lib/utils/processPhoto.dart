@@ -136,12 +136,12 @@ Future<void> processAction(
 
   // Update the index and the number parameter
   ref.read(photoIndexProvider.notifier).update((value) => value + change);
-  ref.read(parameterProvider(t.select.parameters.number.key).notifier).update((
-    value,
-  ) {
-    debugPrint(
-      'Value: $value. New value: ${(int.tryParse(value) ?? 0) + change}',
-    );
-    return ((int.tryParse(value) ?? 0) + change).toString();
-  });
+  ref
+      .read(parameterProvider(t.workspace.parameters.number.key).notifier)
+      .update((value) {
+        debugPrint(
+          'Value: $value. New value: ${(int.tryParse(value) ?? 0) + change}',
+        );
+        return ((int.tryParse(value) ?? 0) + change).toString();
+      });
 }
