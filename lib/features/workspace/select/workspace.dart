@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../i18n/strings.g.dart';
+import '../../../utils/photo_queue_state.dart';
 import '../../../utils/placement.dart';
 import '../../../widgets/panel_header.dart';
 import '../../core/providers/configuration.dart';
@@ -130,3 +131,4 @@ class Workspace extends ConsumerWidget {
     );
   }
 }
+

@@ -7,8 +7,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
 
+import '../../i18n/strings.g.dart';
 import '../../models/photo.dart';
 import '../../utils/output_template.dart';
+import '../../utils/photo_queue_state.dart';
 import '../../utils/status.dart';
 import '../../widgets/panel_header.dart';
 import '../core/providers/configuration.dart';
@@ -100,6 +102,10 @@ class InspectorPanel extends ConsumerWidget {
     final current = hasPhoto ? index + 1 : 0;
     final progress = total == 0 ? 0.0 : current / total;
 
+    final isAllProcessed = ref.watch(
+      photosProvider.select((photos) => allPhotosProcessed(photos)),
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -139,6 +145,8 @@ class InspectorPanel extends ConsumerWidget {
             ],
           ),
         ),
+        if (isAllProcessed)
+           AllProcessedMessage(completionMessage: t.workspace.allProcessed),
         _ProgressSection(current: current, total: total, progress: progress),
       ],
     );
@@ -336,6 +344,49 @@ class _RecentQueueItem extends StatelessWidget {
   }
 }
 
+class AllProcessedMessage extends StatelessWidget {
+  const AllProcessedMessage({required this.completionMessage, super.key});
+
+  final String completionMessage;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12.0),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.secondaryContainer,
+          borderRadius: BorderRadius.circular(12.0),
+          border: Border.all(
+            color: Theme.of(context).colorScheme.outlineVariant,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+          child: Row(
+            children: [
+              Icon(
+                Icons.check_circle_outline,
+                size: 18,
+                color: Theme.of(context).colorScheme.onSecondaryContainer,
+              ),
+              const SizedBox(width: 8.0),
+              Expanded(
+                child: Text(
+                  completionMessage,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSecondaryContainer,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _ProgressSection extends StatelessWidget {
   const _ProgressSection({
     required this.current,
@@ -363,7 +414,10 @@ class _ProgressSection extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8.0),
-          LinearProgressIndicator(value: progress),
+          LinearProgressIndicator(
+            value: progress,
+            backgroundColor: Theme.of(context).colorScheme.outlineVariant,
+          ),
         ],
       ),
     );

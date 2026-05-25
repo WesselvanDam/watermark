@@ -68,10 +68,11 @@
       "skip": "Skip",
       "dontMark": "Keep, don't mark",
       "mark": "Keep and mark"
-    }
+    },
+    "allProcessed": "All images have been processed."
   },
   "progress": "${current} of ${total}",
   "shortcuts": "Activate shortcuts",
-  "shortcutsDescription": "Left arrow: Previous, Right arrow: Skip, Down arrow: Keep, Up arrow: Keep and mark",
+  "shortcutsDescription": "Allows you to use keyboard shortcuts to process images.",
   "save": "Save configuration"
 }

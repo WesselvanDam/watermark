@@ -3,14 +3,11 @@ import 'package:path/path.dart' as p;
 
 const Set<String> _allowedPlaceholders = {
   'folder',
-  'file',
   'filename',
   'number',
   'status',
   'original',
 };
-
-const Map<String, String> _placeholderAliases = {'file': 'filename'};
 
 class OutputTemplateIssue {
   const OutputTemplateIssue(this.message);
@@ -45,10 +42,6 @@ class OutputTemplateAnalysis {
   bool get isValid => issues.isEmpty;
 
   String? get message => issues.isEmpty ? null : issues.first.message;
-}
-
-String canonicalizeOutputTemplatePlaceholder(String name) {
-  return _placeholderAliases[name] ?? name;
 }
 
 OutputTemplateAnalysis analyzeOutputTemplate(String template) {
@@ -121,11 +114,8 @@ OutputTemplateAnalysis analyzeOutputTemplate(String template) {
       continue;
     }
 
-    final canonicalPlaceholder = canonicalizeOutputTemplatePlaceholder(
-      placeholderText,
-    );
     final isKnownPlaceholder = _allowedPlaceholders.contains(
-      canonicalPlaceholder,
+      placeholderText,
     );
     if (!isKnownPlaceholder) {
       issues.add(
@@ -138,7 +128,7 @@ OutputTemplateAnalysis analyzeOutputTemplate(String template) {
     segments.add(
       OutputTemplateSegment.placeholder(
         template.substring(openIndex, closeIndex + 1),
-        placeholder: canonicalPlaceholder,
+        placeholder: placeholderText,
         isKnownPlaceholder: isKnownPlaceholder,
       ),
     );

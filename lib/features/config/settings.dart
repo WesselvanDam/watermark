@@ -171,7 +171,7 @@ class Settings extends ConsumerWidget {
               children: [
                 for (var r = 0; r < 3; r++)
                   Column(
-                    children: [for (var c = 0; c < 3; c++) buttonFor(c, r)],
+                    children: [for (var c = 0; c < 3; c++) buttonFor(r, c)],
                   ),
               ],
             );

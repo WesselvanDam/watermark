@@ -13,6 +13,7 @@ import '../features/photo/photoIndex.dart';
 import '../features/core/providers/configuration.dart';
 import '../features/core/providers/parameters.dart';
 import '../features/core/providers/photos.dart';
+import 'photo_queue_state.dart';
 import 'generateOutputPath.dart';
 import 'markImage.dart';
 import 'status.dart';
@@ -134,14 +135,19 @@ Future<void> processAction(
         .updateAtIndex(index, (photo) => updatedPhoto);
   });
 
-  // Update the index and the number parameter
-  ref.read(photoIndexProvider.notifier).update((value) => value + change);
-  ref
-      .read(parameterProvider(t.workspace.parameters.number.key).notifier)
-      .update((value) {
-        debugPrint(
-          'Value: $value. New value: ${(int.tryParse(value) ?? 0) + change}',
-        );
-        return ((int.tryParse(value) ?? 0) + change).toString();
-      });
+  final photos = ref.read(photosProvider);
+  final shouldAdvance = shouldAdvancePhotoIndex(index, photos.length, change);
+
+  if (shouldAdvance) {
+    // Update the index and the number parameter.
+    ref.read(photoIndexProvider.notifier).update((value) => value + change);
+    ref
+        .read(parameterProvider(t.workspace.parameters.number.key).notifier)
+        .update((value) {
+          debugPrint(
+            'Value: $value. New value: ${(int.tryParse(value) ?? 0) + change}',
+          );
+          return ((int.tryParse(value) ?? 0) + change).toString();
+        });
+  }
 }
