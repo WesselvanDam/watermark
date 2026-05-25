@@ -8,6 +8,7 @@ import '../../i18n/strings.g.dart';
 import '../../widgets/input_row.dart';
 import '../../widgets/panel_header.dart';
 import '../core/providers/configuration.dart';
+import '../core/providers/parameters.dart';
 import '../core/providers/prefs.dart';
 import 'widgets/explorerField.dart';
 import 'widgets/filenameFormat.dart';
@@ -80,9 +81,14 @@ class Settings extends ConsumerWidget {
         info: t.config.input.source.info,
         child: ExplorerField(
           pickFolder: true,
-          onPathSelected: (value) => ref
-              .read(configurationProvider.notifier)
-              .update((state) => state.copyWith(inputPath: value)),
+          onPathSelected: (value) {
+            // Update the config with the new input path
+            ref
+                .read(configurationProvider.notifier)
+                .update((state) => state.copyWith(inputPath: value));
+            // Reset the number parameter
+            ref.invalidate(parameterProvider('number'));
+          },
           displayCallback: (config) =>
               config.inputPath ?? t.config.input.source.placeholder,
         ),

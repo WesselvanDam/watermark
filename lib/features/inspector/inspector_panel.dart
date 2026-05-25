@@ -15,7 +15,7 @@ import '../core/providers/photos.dart';
 import '../photo/photoIndex.dart';
 import 'widgets/parameter.dart';
 
-const int _recentQueueLimit = 5;
+const int _recentQueueLimit = 8;
 
 String _formatTakenAt(DateTime? date) {
   if (date == null) {
