@@ -1,7 +1,4 @@
-import 'dart:io';
-import 'dart:ui' as ui;
 
-import 'package:exif/exif.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -14,10 +11,10 @@ import '../../utils/photo_queue_state.dart';
 import '../../utils/status.dart';
 import '../../widgets/panel_header.dart';
 import '../core/providers/configuration.dart';
-import '../core/providers/photos.dart';
 import '../core/providers/parameters.dart';
+import '../core/providers/photos.dart';
 import '../photo/photoIndex.dart';
-import '../workspace/select/local_widgets/parameter.dart';
+import 'widgets/parameter.dart';
 
 const int _recentQueueLimit = 5;
 

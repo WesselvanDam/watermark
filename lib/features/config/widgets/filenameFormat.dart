@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../i18n/strings.g.dart';
-import '../../../features/core/providers/configuration.dart';
-import '../../../features/core/providers/filename_format_validation.dart';
 import '../../../utils/output_template.dart';
+import '../../core/providers/configuration.dart';
+import '../../core/providers/filename_format_validation.dart';
 
 class FilenameFormat extends ConsumerStatefulWidget {
   const FilenameFormat({super.key});

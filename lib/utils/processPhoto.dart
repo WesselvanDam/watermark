@@ -6,16 +6,16 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image/image.dart' as img;
 
-import '../i18n/strings.g.dart';
-import '../models/config.dart';
-import '../models/photo.dart';
-import '../features/photo/photoIndex.dart';
 import '../features/core/providers/configuration.dart';
 import '../features/core/providers/parameters.dart';
 import '../features/core/providers/photos.dart';
-import 'photo_queue_state.dart';
+import '../features/photo/photoIndex.dart';
+import '../i18n/strings.g.dart';
+import '../models/config.dart';
+import '../models/photo.dart';
 import 'generateOutputPath.dart';
 import 'markImage.dart';
+import 'photo_queue_state.dart';
 import 'status.dart';
 
 Future<Photo> _skip(Photo photo) async {

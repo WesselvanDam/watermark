@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../models/config.dart';
-import '../../../features/core/providers/configuration.dart';
+import '../../core/providers/configuration.dart';
 
 class PlacementSlider extends ConsumerWidget {
   const PlacementSlider({

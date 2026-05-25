@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../models/config.dart';
-import '../../../features/core/providers/configuration.dart';
+import '../../core/providers/configuration.dart';
 
 class ExplorerField extends ConsumerStatefulWidget {
   const ExplorerField({
@@ -56,7 +56,9 @@ class _ExplorerFieldState extends ConsumerState<ExplorerField> {
         OutlinedButton(
           onPressed: () async {
             final path = await _selectPath(context, ref);
-            if (path == null) return;
+            if (path == null) {
+              return;
+            }
 
             widget.onPathSelected(path);
             _controller.text = path;

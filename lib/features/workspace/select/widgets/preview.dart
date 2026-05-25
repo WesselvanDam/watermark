@@ -5,10 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../models/config.dart';
+import '../../../../utils/placement.dart';
 import '../../../core/providers/configuration.dart';
 import '../../../core/providers/placement_validation.dart';
 import '../../../core/providers/watermark.dart';
-import '../../../../utils/placement.dart';
 
 class ImagePreview extends ConsumerStatefulWidget {
   const ImagePreview({required this.image, super.key});

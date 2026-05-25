@@ -2,10 +2,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image/image.dart' as img;
 
 import '../../../utils/placement.dart';
+import '../../photo/photoIndex.dart';
 import 'configuration.dart';
 import 'photos.dart';
 import 'watermark.dart';
-import '../../photo/photoIndex.dart';
 
 final placementValidationProvider = Provider<PlacementValidationResult>((ref) {
   final config = ref.watch(configurationProvider);

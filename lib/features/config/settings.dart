@@ -11,9 +11,9 @@ import '../core/providers/configuration.dart';
 import '../core/providers/filename_format_validation.dart';
 import '../core/providers/placement_validation.dart';
 import '../core/providers/prefs.dart';
-import 'local_widgets/explorerField.dart';
-import 'local_widgets/filenameFormat.dart';
-import 'local_widgets/placementSlider.dart';
+import 'widgets/explorerField.dart';
+import 'widgets/filenameFormat.dart';
+import 'widgets/placementSlider.dart';
 
 class Settings extends ConsumerWidget {
   const Settings({this.asPanel = false, super.key});
@@ -139,7 +139,7 @@ class Settings extends ConsumerWidget {
               final y = row / 2.0;
               final selected = anchorX == x && anchorY == y;
               return Padding(
-                padding: const EdgeInsets.all(0),
+                padding: const EdgeInsets.all(2),
                 child: OutlinedButton(
                   style: OutlinedButton.styleFrom(
                     backgroundColor: selected

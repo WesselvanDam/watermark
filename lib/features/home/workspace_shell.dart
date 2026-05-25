@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../config/settings.dart';
 import '../inspector/inspector_panel.dart';
-import 'select/workspace.dart';
+import '../workspace/select/workspace.dart';
 
 const double _leftPanelWidth = 320.0;
 const double _rightPanelWidth = 320.0;

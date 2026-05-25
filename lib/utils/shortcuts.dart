@@ -3,10 +3,10 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../models/photo.dart';
-import '../features/photo/photoIndex.dart';
 import '../features/core/providers/photos.dart';
 import '../features/core/providers/shortcuts.dart';
+import '../features/photo/photoIndex.dart';
+import '../models/photo.dart';
 import 'processPhoto.dart';
 import 'status.dart';
 

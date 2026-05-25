@@ -2,17 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../i18n/strings.g.dart';
-import '../../../utils/photo_queue_state.dart';
-import '../../../utils/placement.dart';
-import '../../../widgets/panel_header.dart';
-import '../../core/providers/configuration.dart';
-import '../../core/providers/placement_validation.dart';
-import '../../core/providers/photos.dart';
-import '../../core/providers/shortcuts.dart';
 import '../../../utils/processPhoto.dart';
 import '../../../utils/status.dart';
+import '../../../widgets/panel_header.dart';
+import '../../core/providers/photos.dart';
+import '../../core/providers/shortcuts.dart';
 import '../../photo/photoIndex.dart';
-import 'local_widgets/preview.dart';
+import 'widgets/preview.dart';
 
 class Workspace extends ConsumerWidget {
   const Workspace({super.key});
@@ -20,7 +16,6 @@ class Workspace extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final index = ref.watch(photoIndexProvider.select((value) => value));
-    final total = ref.watch(photosProvider.select((value) => value.length));
     final photo = ref.watch(
       photosProvider.select((value) {
         if (value.isEmpty || index < 0 || index >= value.length) {
@@ -39,13 +34,9 @@ class Workspace extends ConsumerWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isCompact = constraints.maxWidth < 720;
         final useScrollable =
             !constraints.hasBoundedHeight || constraints.maxHeight < 720;
-        final fieldWidth = isCompact && constraints.hasBoundedWidth
-            ? constraints.maxWidth
-            : 200.0;
-        final progressValue = total <= 1 ? 0.0 : index / (total - 1);
+
         final preview = DecoratedBox(
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surfaceContainerHighest,
@@ -131,4 +122,3 @@ class Workspace extends ConsumerWidget {
     );
   }
 }
-
