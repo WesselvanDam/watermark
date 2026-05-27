@@ -39,13 +39,6 @@ class Settings extends ConsumerWidget {
     }
   }
 
-  Future<void> storeConfig(WidgetRef ref) async {
-    final config = ref.read(configurationProvider);
-    final json = config.toJson();
-    final prefs = ref.read(prefsProvider);
-    await prefs.setString('config', jsonEncode(json));
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final content = _buildContent(context, ref);
@@ -232,24 +225,6 @@ class Settings extends ConsumerWidget {
               .read(configurationProvider.notifier)
               .update((state) => state.copyWith(watermarkWidthFraction: value)),
         ),
-      ),
-      const SizedBox(height: 16.0),
-      Consumer(
-        builder: (context, ref, child) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Align(
-                alignment: Alignment.centerRight,
-                child: OutlinedButton.icon(
-                  onPressed: () => storeConfig(ref),
-                  icon: const Icon(Icons.save),
-                  label: Text(t.save),
-                ),
-              ),
-            ],
-          );
-        },
       ),
       const SizedBox(height: 16.0),
     ];

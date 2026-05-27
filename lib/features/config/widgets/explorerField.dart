@@ -50,6 +50,19 @@ class _ExplorerFieldState extends ConsumerState<ExplorerField> {
           child: TextField(
             controller: _controller,
             readOnly: true,
+            decoration: InputDecoration(
+              suffixIcon: IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () {
+                  _controller.clear();
+                  widget.onPathSelected(null);
+                },
+              ),
+              suffixIconConstraints: const BoxConstraints(
+                maxWidth: 32,
+                maxHeight: 32,
+              ),
+            ),
           ),
         ),
         const SizedBox(width: 8.0),

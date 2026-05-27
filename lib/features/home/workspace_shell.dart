@@ -4,8 +4,8 @@ import '../config/settings.dart';
 import '../inspector/inspector_panel.dart';
 import '../workspace/select/workspace.dart';
 
-const double _leftPanelWidth = 320.0;
-const double _rightPanelWidth = 320.0;
+const double _leftPanelWidth = 380.0;
+const double _rightPanelWidth = 380.0;
 const double _fullShellBreakpoint = 1280.0;
 const double _leftOnlyBreakpoint = 768.0;
 
