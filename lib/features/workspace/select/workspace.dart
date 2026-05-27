@@ -8,6 +8,7 @@ import '../../../widgets/panel_header.dart';
 import '../../core/providers/photos.dart';
 import '../../core/providers/shortcuts.dart';
 import '../../photo/photoIndex.dart';
+import 'widgets/action_buttons.dart';
 import 'widgets/preview.dart';
 
 class Workspace extends ConsumerWidget {
@@ -26,7 +27,16 @@ class Workspace extends ConsumerWidget {
     );
 
     if (photo == null) {
-      return const SizedBox();
+      return Center(
+        child: SizedBox(
+          width: 400.0,
+          child: Text(
+            'No photos found. Please choose a folder with photos in the settings.',
+            style: Theme.of(context).textTheme.titleMedium,
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
     }
 
     Future<void> handler(Status status, int change) =>
@@ -64,38 +74,7 @@ class Workspace extends ConsumerWidget {
               else
                 Expanded(child: preview),
               const SizedBox(height: 12.0),
-              Row(
-                spacing: 16.0,
-                children: [
-                  const Spacer(),
-                  OutlinedButton.icon(
-                    onPressed: () => handler(Status.none, -1),
-                    icon: const Icon(Icons.arrow_back),
-                    label: Text(t.workspace.actions.previous),
-                  ),
-                  Column(
-                    spacing: 8.0,
-                    children: [
-                      FilledButton.icon(
-                        onPressed: () => handler(Status.marked, 1),
-                        icon: const Icon(Icons.arrow_upward),
-                        label: Text(t.workspace.actions.mark),
-                      ),
-                      FilledButton.tonalIcon(
-                        onPressed: () => handler(Status.keptUnmarked, 1),
-                        icon: const Icon(Icons.arrow_downward),
-                        label: Text(t.workspace.actions.dontMark),
-                      ),
-                    ],
-                  ),
-                  OutlinedButton.icon(
-                    onPressed: () => handler(Status.skipped, 1),
-                    icon: const Icon(Icons.arrow_forward),
-                    label: Text(t.workspace.actions.skip),
-                  ),
-                  const Spacer(),
-                ],
-              ),
+              WorkspaceActionButtons(index: index, onAction: handler),
               const SizedBox(height: 8.0),
               Consumer(
                 builder: (context, ref, child) {

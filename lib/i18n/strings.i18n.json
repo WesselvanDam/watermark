@@ -76,8 +76,8 @@
     "actions": {
       "previous": "Previous",
       "skip": "Skip",
-      "dontMark": "Keep, don't mark",
-      "mark": "Keep and mark"
+      "dontMark": "Keep only",
+      "mark": "Watermark"
     },
     "allProcessed": "All images have been processed."
   },
