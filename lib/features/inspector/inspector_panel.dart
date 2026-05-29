@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/experimental/mutation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
@@ -16,6 +17,8 @@ import '../photo/photoIndex.dart';
 import 'widgets/parameter.dart';
 
 const int _recentQueueLimit = 8;
+
+final deleteSkippedMutation = Mutation<void>();
 
 String _formatTakenAt(DateTime? date) {
   if (date == null) {
@@ -89,14 +92,31 @@ class InspectorPanel extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final photos = ref.watch(photosProvider);
-    final index = ref.watch(photoIndexProvider);
-    final hasPhoto = index >= 0 && index < photos.length;
-    final photo = hasPhoto ? photos[index] : null;
-    final recentItems = _recentQueue(photos, index);
-    final total = photos.length;
-    final current = hasPhoto ? index + 1 : 0;
-    final progress = total == 0 ? 0.0 : current / total;
+    final currentIndex = ref.watch(photoIndexProvider);
+    final currentPhoto = ref.watch(
+      photosProvider.select((photos) {
+        if (currentIndex >= 0 && currentIndex < photos.length) {
+          return photos[currentIndex];
+        }
+        return null;
+      }),
+    );
+    final numPhotos = ref.watch(
+      photosProvider.select((photos) => photos.length),
+    );
+    final recentItems = ref.watch(
+      photosProvider.select((photos) {
+        final modifiedPhotos = photos
+            .where((photo) => photo.status != Status.none)
+            .toList();
+        modifiedPhotos.sort((a, b) {
+          final aTime = a.modifiedTime ?? a.original.lastModifiedSync();
+          final bTime = b.modifiedTime ?? b.original.lastModifiedSync();
+          return bTime.compareTo(aTime);
+        });
+        return modifiedPhotos.take(_recentQueueLimit);
+      }),
+    );
 
     final isAllProcessed = ref.watch(
       photosProvider.select((photos) => allPhotosProcessed(photos)),
@@ -114,10 +134,10 @@ class InspectorPanel extends ConsumerWidget {
             children: [
               Text('Metadata'.toUpperCase(), style: textStyle),
               const Divider(),
-              if (photo == null)
+              if (currentPhoto == null)
                 const _EmptyState(message: 'No photo selected.')
               else
-                _MetadataRows(photo: photo),
+                _MetadataRows(photo: currentPhoto),
               const SizedBox(height: 32.0),
 
               Text('Parameters'.toUpperCase(), style: textStyle),
@@ -138,15 +158,18 @@ class InspectorPanel extends ConsumerWidget {
               const _OutputDestinationPreview(),
               const SizedBox(height: 32.0),
 
-              Text('Recent Queue'.toUpperCase(), style: textStyle),
+              Text('Recent Actions'.toUpperCase(), style: textStyle),
               const Divider(),
               if (recentItems.isEmpty)
                 const _EmptyState(message: 'No processed items yet.')
               else
                 Column(
                   children: [
-                    for (final entry in recentItems)
-                      _RecentQueueItem(entry: entry),
+                    for (final item in recentItems)
+                      _RecentQueueItem(
+                        filepath: item.original.path,
+                        status: item.status,
+                      ),
                   ],
                 ),
             ],
@@ -154,7 +177,71 @@ class InspectorPanel extends ConsumerWidget {
         ),
         if (isAllProcessed)
           AllProcessedMessage(completionMessage: t.workspace.allProcessed),
-        _ProgressSection(current: current, total: total, progress: progress),
+        Consumer(
+          builder: (context, ref, child) {
+            final skippedCount = ref.watch(
+              photosProvider.select(
+                (photos) => photos
+                    .where((photo) => photo.status == Status.skipped)
+                    .length,
+              ),
+            );
+            final deleteSkipped = ref.watch(deleteSkippedMutation);
+
+            if (deleteSkipped is MutationError) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Error Deleting Skipped Photos'),
+                    content: Text(deleteSkipped.error.toString()),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: const Text('OK'),
+                      ),
+                    ],
+                  ),
+                );
+              });
+            }
+            
+            return Padding(
+              padding: const EdgeInsets.only(top: 8.0, bottom: 12.0),
+              child: FilledButton.icon(
+                onPressed: switch (deleteSkipped) {
+                  MutationIdle() =>
+                    skippedCount == 0
+                        ? null
+                        : () async {
+                            await ref
+                                .read(photosProvider.notifier)
+                                .deleteSkipped();
+                          },
+                  _ => null,
+                },
+                icon: const Icon(Icons.delete_sweep),
+                label: switch (deleteSkipped) {
+                  MutationIdle() => Text(
+                    skippedCount == 0
+                        ? 'Delete skipped'
+                        : 'Delete skipped ($skippedCount)',
+                  ),
+                  MutationPending() => const Text('Deleting...'),
+                  MutationError() => const Text('Error deleting skipped photos'),
+                  MutationSuccess() => const Text('Deleted'),
+                },
+                style: FilledButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.errorContainer,
+                  foregroundColor: Theme.of(
+                    context,
+                  ).colorScheme.onErrorContainer,
+                ),
+              ),
+            );
+          },
+        ),
+        _ProgressSection(current: currentIndex, total: numPhotos),
       ],
     );
   }
@@ -281,15 +368,16 @@ class _MetaRow extends StatelessWidget {
 }
 
 class _RecentQueueItem extends StatelessWidget {
-  const _RecentQueueItem({required this.entry});
+  const _RecentQueueItem({required this.filepath, required this.status});
 
-  final _QueueEntry entry;
+  final String filepath;
+  final Status status;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final statusInfo = _statusPresentation(entry.status, colorScheme);
+    final statusInfo = _statusPresentation(status, colorScheme);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: Row(
@@ -298,7 +386,7 @@ class _RecentQueueItem extends StatelessWidget {
           const SizedBox(width: 8.0),
           Expanded(
             child: Text(
-              path.basename(entry.path),
+              path.basename(filepath),
               style: textTheme.bodySmall,
               overflow: TextOverflow.ellipsis,
             ),
@@ -358,15 +446,10 @@ class AllProcessedMessage extends StatelessWidget {
 }
 
 class _ProgressSection extends StatelessWidget {
-  const _ProgressSection({
-    required this.current,
-    required this.total,
-    required this.progress,
-  });
+  const _ProgressSection({required this.current, required this.total});
 
   final int current;
   final int total;
-  final double progress;
 
   @override
   Widget build(BuildContext context) {
@@ -383,7 +466,7 @@ class _ProgressSection extends StatelessWidget {
         ),
         const SizedBox(height: 8.0),
         LinearProgressIndicator(
-          value: progress,
+          value: total > 0 ? current / total : 0.0,
           backgroundColor: Theme.of(context).colorScheme.outlineVariant,
         ),
       ],

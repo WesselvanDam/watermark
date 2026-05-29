@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -41,7 +42,7 @@ class Photos extends _$Photos {
 
   void updateAtIndex(int index, Photo Function(Photo) cb) {
     final newState = List<Photo>.from(state);
-    newState[index] = cb(newState[index]);
+    newState[index] = cb(newState[index]).copyWith(modifiedTime: DateTime.now());
     state = newState;
   }
 
@@ -68,5 +69,44 @@ class Photos extends _$Photos {
         unmarkedPath: unMarkedPath,
       ),
     );
+  }
+
+  Future<int> deleteSkipped() async {
+    if (state.isEmpty) {
+      return 0;
+    }
+
+    final remaining = <Photo>[];
+    final failedDeletes = <Photo>[];
+    var movedCount = 0;
+
+    for (final photo in state) {
+      if (photo.status != Status.skipped) {
+        remaining.add(photo);
+        continue;
+      }
+
+      try {
+        await photo.original.delete();
+        debugPrint('Deleted: ${photo.original.path}');
+        movedCount += 1;
+      } catch (e) {
+        debugPrint('Failed to delete ${photo.original.path}: $e');
+        remaining.add(photo);
+        failedDeletes.add(photo);
+      }
+    }
+
+    if (movedCount > 0) {
+      state = remaining;
+    }
+
+    if (failedDeletes.isNotEmpty) {
+      throw Exception(
+        'Failed to delete ${failedDeletes.length} skipped photos:\n\n${failedDeletes.map((e) => e.original.path).join('\n')}',
+      );
+    }
+
+    return movedCount;
   }
 }

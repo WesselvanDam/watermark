@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +8,6 @@ import '../../widgets/input_row.dart';
 import '../../widgets/panel_header.dart';
 import '../core/providers/configuration.dart';
 import '../core/providers/parameters.dart';
-import '../core/providers/prefs.dart';
 import 'widgets/explorerField.dart';
 import 'widgets/filenameFormat.dart';
 import 'widgets/maxSizeField.dart';

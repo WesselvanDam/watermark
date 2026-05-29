@@ -13,5 +13,6 @@ abstract class Photo with _$Photo {
     @Default(Status.none) Status status,
     @Default(null) String? markedPath,
     @Default(null) String? unmarkedPath,
+    DateTime? modifiedTime,
   }) = _Photo;
 }

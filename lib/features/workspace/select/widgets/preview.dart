@@ -102,7 +102,7 @@ class _ImagePreviewState extends ConsumerState<ImagePreview> {
                                         color: Theme.of(context)
                                             .colorScheme
                                             .errorContainer
-                                            .withOpacity(0.9),
+                                            .withValues(alpha: 0.9),
                                         borderRadius: BorderRadius.circular(
                                           12.0,
                                         ),

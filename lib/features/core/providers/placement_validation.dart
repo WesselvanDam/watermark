@@ -16,7 +16,7 @@ final placementValidationProvider = Provider<PlacementValidationResult>((ref) {
       : photos[index];
   final watermark = ref.watch(watermarkProvider).value;
 
-  if (selectedPhoto == null) {
+  if (selectedPhoto == null || !selectedPhoto.original.existsSync()) {
     return const PlacementValidationResult.unavailable(
       'Select an input image to validate placement.',
     );

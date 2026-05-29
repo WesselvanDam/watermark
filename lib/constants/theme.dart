@@ -124,7 +124,7 @@ class MaterialTheme {
       chipTheme: ChipThemeData(
         backgroundColor: colorScheme.surfaceContainerHigh,
         disabledColor: colorScheme.surfaceContainerHigh,
-        selectedColor: colorScheme.primary.withOpacity(0.2),
+        selectedColor: colorScheme.primary.withValues(alpha: 0.2),
         labelStyle: textTheme.labelSmall?.copyWith(
           color: colorScheme.onSurface,
         ),
@@ -160,7 +160,7 @@ class MaterialTheme {
         activeTrackColor: colorScheme.primary,
         inactiveTrackColor: colorScheme.outlineVariant,
         thumbColor: colorScheme.primary,
-        overlayColor: colorScheme.primary.withOpacity(0.15),
+        overlayColor: colorScheme.primary.withValues(alpha: 0.15),
         trackHeight: 3.0,
       ),
       checkboxTheme: CheckboxThemeData(

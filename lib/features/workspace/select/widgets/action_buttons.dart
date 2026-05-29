@@ -191,14 +191,14 @@ class _KeycapButton extends StatelessWidget {
       side: WidgetStateProperty.resolveWith(
         (states) => BorderSide(
           color: states.contains(WidgetState.disabled)
-              ? borderColor.withOpacity(0.4)
+              ? borderColor.withValues(alpha: 0.4)
               : borderColor,
         ),
       ),
       elevation: WidgetStateProperty.resolveWith(
         (states) => states.contains(WidgetState.disabled) ? 0.0 : 2.0,
       ),
-      shadowColor: WidgetStateProperty.all(shadowColor.withOpacity(0.25)),
+      shadowColor: WidgetStateProperty.all(shadowColor.withValues(alpha: 0.25)),
     );
   }
 
