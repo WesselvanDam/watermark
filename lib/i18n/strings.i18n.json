@@ -8,6 +8,10 @@
         "placeholder": "Choose the source folder",
         "info": "All images in this folder and its subfolders will be processed"
       },
+      "includeSubdirectories": {
+        "heading": "Include subfolders",
+        "info": "Scan images in subfolders too"
+      },
       "watermark": {
         "heading": "Watermark",
         "placeholder": "Choose the watermark",

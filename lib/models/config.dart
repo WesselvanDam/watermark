@@ -7,6 +7,7 @@ part 'config.g.dart';
 abstract class Config with _$Config {
   const factory Config({
     @Default(null) String? inputPath,
+    @Default(true) bool includeSubdirectories,
     @Default(null) String? watermarkPath,
     @Default(null) String? outputPath,
     @Default(null) String? outputFileNameFormat,

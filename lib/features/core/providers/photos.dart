@@ -17,6 +17,9 @@ class Photos extends _$Photos {
     final imageSourcepath = ref.watch(
       configurationProvider.select((value) => value.inputPath),
     );
+    final includeSubdirectories = ref.watch(
+      configurationProvider.select((value) => value.includeSubdirectories),
+    );
     if (imageSourcepath == null) {
       return [];
     }
@@ -24,7 +27,7 @@ class Photos extends _$Photos {
       return [];
     }
     return Directory(imageSourcepath)
-        .listSync(recursive: true)
+        .listSync(recursive: includeSubdirectories)
         .where((element) {
           return element is File &&
               [

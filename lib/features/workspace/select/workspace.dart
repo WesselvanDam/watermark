@@ -73,7 +73,7 @@ class Workspace extends ConsumerWidget {
                 SizedBox(height: 360.0, child: preview)
               else
                 Expanded(child: preview),
-              const SizedBox(height: 12.0),
+              const SizedBox(height: 16.0),
               WorkspaceActionButtons(index: index, onAction: handler),
               const SizedBox(height: 8.0),
               Consumer(

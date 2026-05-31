@@ -18,4 +18,18 @@ void main() {
     expect(decoded.originalMaxSize, isNull);
     expect(decoded.watermarkedMaxSize, isNull);
   });
+
+  test('defaults to including subdirectories when the field is missing', () {
+    final decoded = Config.fromJson(const <String, dynamic>{});
+
+    expect(decoded.includeSubdirectories, isTrue);
+  });
+
+  test('round-trips the include subdirectories setting through JSON', () {
+    const config = Config(includeSubdirectories: false);
+
+    final decoded = Config.fromJson(config.toJson());
+
+    expect(decoded.includeSubdirectories, isFalse);
+  });
 }

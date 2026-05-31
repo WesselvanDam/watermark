@@ -1,4 +1,3 @@
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -70,18 +69,44 @@ class Settings extends ConsumerWidget {
       InputRow(
         label: t.config.input.source.heading,
         info: t.config.input.source.info,
-        child: ExplorerField(
-          pickFolder: true,
-          onPathSelected: (value) {
-            // Update the config with the new input path
-            ref
-                .read(configurationProvider.notifier)
-                .update((state) => state.copyWith(inputPath: value));
-            // Reset the number parameter
-            ref.invalidate(parameterProvider('number'));
-          },
-          displayCallback: (config) =>
-              config.inputPath ?? t.config.input.source.placeholder,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ExplorerField(
+              pickFolder: true,
+              onPathSelected: (value) {
+                // Update the config with the new input path
+                ref
+                    .read(configurationProvider.notifier)
+                    .update((state) => state.copyWith(inputPath: value));
+                // Reset the number parameter
+                ref.invalidate(parameterProvider('number'));
+              },
+              displayCallback: (config) =>
+                  config.inputPath ?? t.config.input.source.placeholder,
+            ),
+            const SizedBox(height: 8.0),
+            Consumer(
+              builder: (context, ref, child) {
+                final config = ref.watch(configurationProvider);
+                return CheckboxListTile(
+                  contentPadding: EdgeInsets.zero,
+                  dense: true,
+                  controlAffinity: ListTileControlAffinity.leading,
+                  title: Text(t.config.input.includeSubdirectories.heading),
+                  subtitle: Text(t.config.input.includeSubdirectories.info),
+                  value: config.includeSubdirectories,
+                  onChanged: (value) => ref
+                      .read(configurationProvider.notifier)
+                      .update(
+                        (state) => state.copyWith(
+                          includeSubdirectories: value ?? true,
+                        ),
+                      ),
+                );
+              },
+            ),
+          ],
         ),
       ),
       InputRow(
